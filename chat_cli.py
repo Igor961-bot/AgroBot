@@ -30,6 +30,19 @@ conversation_buffer: deque[tuple[str, str]] = deque(maxlen=config.MAX_TURNS)
 archived_dialogue: list[str] = []
 running_summary: str = ""
 
+
+def summarize_dialogue(text: str) -> str:
+    if not text:
+        return ""
+    prompt = (
+        "Streszcz w maksymalnie dwóch zdaniach następującą rozmowę:\n" + text + "\nStreszczenie:"
+    )
+    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=1024)
+    inputs.pop("token_type_ids", None)
+    inputs = {k: v.to(model.device) for k, v in inputs.items()}
+
+
+
 def infer_verbosity(q: str) -> str:
     return "long" if any(t in q.lower() for t in config.LONG_TRIGGERS) else "short"
 
