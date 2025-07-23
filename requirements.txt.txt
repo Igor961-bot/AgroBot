@@ -1,0 +1,19 @@
+# --- core LLM / RAG stack ---
+torch>=2.1.0             # w środowisku GPU z CUDA 11.8 lub 12.x
+transformers>=4.39.0
+accelerate>=0.28.0       # używane przez transformers do ładowania modelu
+bitsandbytes>=0.43.0     # 4-bit quant (NF4) dla PLLuM-12B
+sentence-transformers>=2.6.1
+chromadb>=0.4.24         # HNSW + persistent store
+
+# --- narzędzia pomocnicze ---
+numpy>=1.24
+tqdm>=4.66               # pasek postępu przy embedowaniu
+pdfplumber>=0.10.4       # parser PDF (jeśli używasz build_index na plikach .pdf)
+pandas>=2.0              # logi .csv wygodniej przeglądać w notebooku
+
+# --- HuggingFace Hub / serce ekosystemu ---
+huggingface-hub>=0.21.0
+
+# --- opcjonalnie: ograniczenie ostrzeżeń SSL w Colabie / WSL ---
+certifi>=2024.2.2
