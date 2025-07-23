@@ -11,17 +11,16 @@ import csv, sys, re, numpy as np
 from datetime import datetime
 from collections import deque
 
-from chromadb import Client
+from chromadb import PersistentClient
 from sentence_transformers import SentenceTransformer
 import torch
 
 # ---- nasze moduły ----
 import config
 from model_loader import load_llm
-from embedding.utils import summarize_dialogue   # to masz już w projekcie
 
 # ---- inicjalizacja ----
-client        = Client()
+client        = PersistentClient(path="chroma_store")
 collection    = client.get_collection(config.CHROMA_COLLECTION)
 embedder      = SentenceTransformer(config.EMBEDDER_NAME)
 model, tok    = load_llm()
@@ -40,6 +39,17 @@ def summarize_dialogue(text: str) -> str:
     inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=1024)
     inputs.pop("token_type_ids", None)
     inputs = {k: v.to(model.device) for k, v in inputs.items()}
+
+    with torch.inference_mode():
+        out = model.generate(**inputs,
+                             max_new_tokens=64,
+                             repetition_penalty=1.1,
+                             eos_token_id=tokenizer.eos_token_id, pad_token_id=tokenizer.eos_token_id)
+
+    summary = tokenizer.decode(out[0], skip_special_tokens=True).strip()
+    if "Streszczenie:" in summary:
+        summary = summary.split("Streszczenie:")[-1].strip()
+    return summary
 
 
 
@@ -66,7 +76,7 @@ def query_rag(question: str):
 with open("rag_answers.csv", "w", newline="", encoding="utf-8") as f:
     csv.writer(f).writerow(["Timestamp", "Question", "Context", "Answer"])
 
-print("💬  Wpisz pytanie (lub 'koniec', 'exit'):")
+print("Wpisz pytanie (lub 'koniec', 'exit'):")
 for line in sys.stdin:
     query = line.strip()
     if query.lower() in {"koniec", "exit", "quit"}:
@@ -79,7 +89,7 @@ for line in sys.stdin:
         old_u, old_a = conversation_buffer.popleft()
         archived_dialogue.append(f"U: {old_u}\nA: {old_a}")
         if len(archived_dialogue) >= config.SUMMARY_TRIGGER:
-            running_summary += " " + summarize_dialogue("\n".join(archived_dialogue), model, tok)
+            running_summary += " " + summarize_dialogue("\n".join(archived_dialogue))
             archived_dialogue.clear()
 
     # ---------- retrieval ----------

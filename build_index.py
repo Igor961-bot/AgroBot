@@ -2,27 +2,50 @@
 
 import json, re, argparse
 from sentence_transformers import SentenceTransformer
-from chromadb import Client
+from chromadb import PersistentClient
 from config import (JSON_ACT_PATH, CHROMA_COLLECTION, EMBEDDER_NAME)
 
 def clean_text(txt: str) -> str:
     return re.sub(r"\s+", " ", txt.strip())
 
-def prepare_documents(data: dict):
-    docs, metas, ids = [], [], []
-    for ch in data["document"]["chapters"]:
-        ch_no = ch["number"]
-        for art in ch["articles"]:
-            art_no = art["article"].replace(".", "")
-            for sub in art["subsections"]:
-                num, txt = sub["number"], sub["content"]
-                if not txt or txt == "Treść uchylona":
+
+def clean_and_expand_content(content: str) -> str:
+    abbreviations = {
+        r"\bDz\. U\.": "Dziennik Ustaw",
+        r"\bz późn\. zm\.": "z późniejszymi zmianami",
+        r"\bKasa\b": "Kasa Rolniczego Ubezpieczenia Społecznego",
+        r"\bZakład\b": "Zakład Ubezpieczeń Społecznych",
+        r"\bRada Rolników\b": "Rada Ubezpieczenia Społecznego Rolników",
+        r"\bPKD\b": "Polska Klasyfikacja Działalności",
+        r"\bMonitor Polski\b": "Dziennik Urzędowy Rzeczypospolitej Polskiej Monitor Polski",
+    }
+    for abbr, full in abbreviations.items():
+        content = re.sub(abbr, full, content, flags=re.IGNORECASE)
+    return re.sub(r"\s+", " ", content.strip())
+
+
+
+def prepare_documents(data):
+    documents, metadatas, ids, seen = [], [], [], set()
+    for chapter in data["document"]["chapters"]:
+        ch_num = chapter["number"]
+        for article in chapter["articles"]:
+            art_num = article["article"].replace('.', '')
+            for sub in article["subsections"]:
+                sub_num, content = sub["number"], sub["content"]
+                if not content.strip() or content == "Treść uchylona":
                     continue
-                uid = f"ch{ch_no}_art{art_no}_sub{num}"
-                metas.append({"chapter": ch_no, "article": art_no, "sub": num})
+                cleaned = clean_and_expand_content(content)
+                uid = f"ch{ch_num}_art{art_num}_sub{sub_num}"
+                if uid in seen:
+                    continue
+                seen.add(uid)
+                documents.append(cleaned)
+                metadatas.append(
+                    {"chapter": ch_num, "article": art_num, "subsection": sub_num}
+                )
                 ids.append(uid)
-                docs.append(clean_text(txt))
-    return docs, metas, ids
+    return documents, metadatas, ids
 
 def main():
     with open(JSON_ACT_PATH, encoding="utf-8") as f:
@@ -30,7 +53,7 @@ def main():
 
     docs, metas, ids = prepare_documents(data)
     emb = SentenceTransformer(EMBEDDER_NAME)
-    client = Client()
+    client = PersistentClient(path="chroma_store")
     try:
         client.delete_collection(CHROMA_COLLECTION)
     except Exception:
