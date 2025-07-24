@@ -5,7 +5,6 @@ Zakładamy:
   • build_index.py utworzył kolekcję Chroma
   • model_loader.load_llm() zwraca (model, tokenizer)
   • config.py zawiera wszystkie stałe
-Uruchom:  python chat_cli.py
 """
 import csv, sys, re, numpy as np
 from datetime import datetime
@@ -30,7 +29,7 @@ archived_dialogue: list[str] = []
 running_summary: str = ""
 
 
-def summarize_dialogue(text: str) -> str:
+def summarize_dialogue(text: str, model, tokenizer) -> str:
     if not text:
         return ""
     prompt = (
@@ -89,7 +88,7 @@ for line in sys.stdin:
         old_u, old_a = conversation_buffer.popleft()
         archived_dialogue.append(f"U: {old_u}\nA: {old_a}")
         if len(archived_dialogue) >= config.SUMMARY_TRIGGER:
-            running_summary += " " + summarize_dialogue("\n".join(archived_dialogue))
+            running_summary += " " + summarize_dialogue("\n".join(archived_dialogue), model, tok)
             archived_dialogue.clear()
 
     # ---------- retrieval ----------
@@ -119,7 +118,7 @@ for line in sys.stdin:
         + "\n\nInstrukcje dla asystenta:\n"
         + "Napisz pełnymi zdaniami, zrozumiałym językiem. "
           "Nie powtarzaj słów „z kontekstu wynika”, „na podstawie kontekstu” ani całych fragmentów ustawy. "
-          "Jeżeli odpowiedź wymaga kilku punktów, przedstaw je jako listę wypunktowaną. "
+          "Staraj się odpowiadać w formie listy wypunktowanej, jeśli to możliwe. "
           "Unikaj dygresji i nie cytuj dosłownie kontekstu, chyba że to konieczne.\n"
         + "Odpowiedź:"
     )
