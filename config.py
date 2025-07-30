@@ -1,14 +1,15 @@
-# -------- ogólne ścieżki / nazwy kolekcji --------
+#ogólne ścieżki i nazwy kolekcji
 
 JSON_ACT_PATH     = "./data/ustawa_processed.json"     
 CHROMA_COLLECTION = "ustawa_1"
 
-# -------- modele --------
+#modele
 
-MODEL_NAME    = "CYFRAGOVPL/PLLuM-12B-nc-chat" # chatbot
-EMBEDDER_NAME = "paraphrase-multilingual-MiniLM-L12-v2" # embedder
+MODEL_NAME    = "CYFRAGOVPL/PLLuM-12B-nc-chat"
+EMBEDDER_NAME = "paraphrase-multilingual-MiniLM-L12-v2" 
+ENCODER_NAME = 'radlab/polish-cross-encoder'
 
-# -------- RAG / chat --------
+#RAG
 TOP_K            = 5                							# ile powiązanych z zapytaniem fragmetnów ustawy wyciągać z BD?
 MAX_TURNS        = 2		    							# ile pytań wstecz do zapamiętania jako surowy tekst?
 SUMMARY_TRIGGER  = 3		    							# ile zapytań starszych niż MAX_TURNS w pamięci, aby zacząć podsumowywać kontekst rozmowy?
