@@ -12,7 +12,7 @@ from collections import deque
 from chromadb import PersistentClient
 from sentence_transformers import SentenceTransformer
 import torch
-from cross_encoder import CrossEncoder
+from sentence_transformers import CrossEncoder
 
 import config
 from model_loader import load_llm
@@ -22,7 +22,10 @@ client     = PersistentClient(path="chroma_store")
 collection = client.get_collection(config.CHROMA_COLLECTION)
 embedder   = SentenceTransformer(config.EMBEDDER_NAME)
 model, tok = load_llm()
-cross_encoder = CrossEncoder(config.ENCODER_NAME, max_length=1024)
+cross_encoder = CrossEncoder(config.ENCODER_NAME,
+                             max_length=512,  
+                             device='cuda',  
+                             tokenizer_kwargs={'truncation': True})
 
 conversation_buffer: deque[tuple[str, str]] = deque(maxlen=config.MAX_TURNS)
 archived_dialogue: list[str] = []
@@ -43,16 +46,15 @@ def get_full_article(chapter_num, article_num):
     return None
 
 
-def shorten_article_for_ce(article, tokenizer, max_tokens=1024):
-    """Jeśli artykuł jest za długi do cross-encodera — skróć sprytnie."""
+def shorten_article_for_ce(article, tokenizer, max_tokens=510): 
     tokens = tokenizer(article)["input_ids"]
     if len(tokens) <= max_tokens:
         return article
-    # Bierz: 400 pierwszych tokenów, 200 ostatnich, 400 środkowych
-    first = tokenizer.decode(tokens[:400])
-    mid = tokenizer.decode(tokens[len(tokens)//2 - 200 : len(tokens)//2 + 200])
-    last = tokenizer.decode(tokens[-200:])
+    first = tokenizer.decode(tokens[:200])
+    mid   = tokenizer.decode(tokens[len(tokens)//2 - 55 : len(tokens)//2 + 55])
+    last  = tokenizer.decode(tokens[-200:])
     return f"{first}\n... (fragment) ...\n{mid}\n... (fragment) ...\n{last}"
+
 
 
 
@@ -148,9 +150,9 @@ for line in sys.stdin:
 
 
     # ---------- prompt ----------
-    summary_block = f"Streszczenie starszej rozmowy między mną a użytkownikiem:\n{running_summary}\n\n" \
+    summary_block = f"Streszczenie starszej rozmowy między tobą a użytkownikiem:\n{running_summary}\n\n" \
                     if running_summary else ""
-    history_block = "\n".join([f"Użytkownik: {u}\nOdpowiedziałem: {a}" for u, a in conversation_buffer])
+    history_block = "\n".join([f"Użytkownik: {u}\nOdpowiedziałeś {a}" for u, a in conversation_buffer])
     if history_block:
         history_block = "Ostatnie wymiany:\n" + history_block + "\n\n"
 
@@ -165,7 +167,7 @@ for line in sys.stdin:
         + "Jesteś asystentem, który ma odpowiadać z zakresu wiedzy o ubezpieczeniach rolniczych, bądź pozytywny"
           "Napisz pełnymi zdaniami, zrozumiałym językiem. "
           "Nie powtarzaj słów „z kontekstu wynika”, „na podstawie kontekstu” ani całych fragmentów ustawy."
-          "Odpowiadaj listami wypunktowanymi, jeśli to możliwe"
+          "Odpowiadaj w punktach"
           "Jeżeli z kontekstu nie możesz odpowiedzieć na pytanie, odpowiedz 'nie mam na ten temat wiedzy, spróbuj doprecyzować pytanie.'"
           "Unikaj dygresji i nie cytuj dosłownie kontekstu, chyba że to konieczne.\n"
         + "Odpowiedź:"
