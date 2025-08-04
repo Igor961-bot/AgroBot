@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 """
-chat_cli_lc.py  –  RAG + LangChain Multi-Query Retriever
---------------------------------------------------------
-• build_index.py utworzył kolekcję ChromaDB
-• model_loader.load_llm() zwraca (model, tokenizer) – PLLuM-12B-nc-chat
-• config.py przechowuje stałe (ścieżki, TOP_K, LONG_TRIGGERS…)
+chat_cli_lc.py  –  RAG + LangChain Multi‑Query Retriever (DEBUG VERSION)
+-----------------------------------------------------------------------
+Wyświetla pełny prompt, parafrazy MultiQuery oraz finalny kontekst, aby
+ułatwić debugowanie.
+Pozostała funkcjonalność (bufory, log CSV, cross‑encoder, parafrazy, itd.)
+nie została usunięta.
 """
 
 import csv, sys, re, json, numpy as np
@@ -16,42 +17,31 @@ from sentence_transformers import SentenceTransformer, CrossEncoder
 from chromadb import PersistentClient
 
 # ---- LangChain ≥ 0.2 ----
-from langchain_community.vectorstores import Chroma            # ← OK (warning tylko inform.)
+from langchain_community.vectorstores import Chroma
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from langchain_community.llms import HuggingFacePipeline
 
 from transformers import pipeline
 import config
-from model_loader import load_llm   
+from model_loader import load_llm
 
 import warnings
 from transformers import logging as hf_logging
 
-# 1) ucisz “temperature” + inne INFO/WARNING Transformers
 hf_logging.set_verbosity_error()
-
-# 2) ucisz pojedynczy FutureWarning (jeśli Cię razi)
 warnings.filterwarnings(
-    "ignore",
-    category=FutureWarning,
-    message="`encoder_attention_mask` is deprecated"
+    "ignore", category=FutureWarning, message="`encoder_attention_mask` is deprecated"
 )
 
-# 3) po załadowaniu PLLuM-12B
+# ---------- LOAD LLM ---------- #
 model, tok = load_llm()
-model.generation_config.temperature = None     # usuwa flagę
+model.generation_config.temperature = 0.0  # deterministyczne
 
-# 4) zaktualizowane importy LangChain (po pip install -U …)
 from langchain_huggingface import HuggingFacePipeline
 from langchain_chroma import Chroma
-
-
-
-# --- tuż po importach LangChain -------------------------
 from langchain_core.embeddings import Embeddings
 
 class STEmbeddings(Embeddings):
-    """Minimalny wrapper aby Chroma dostała embed_query / embed_documents."""
     def __init__(self, model: SentenceTransformer):
         self.model = model
 
@@ -61,47 +51,31 @@ class STEmbeddings(Embeddings):
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         return self.model.encode(texts, batch_size=32).tolist()
 
+# ---------- PARAPHRASE LLM ---------- #
+hf_pipe = pipeline("text-generation", model=model, tokenizer=tok, max_length=128, do_sample=False)
+para_llm = HuggingFacePipeline(pipeline=hf_pipe)
 
-# używamy tego samego modelu do parafraz! (krótka generacja ~60 tokenów)
-hf_pipe = pipeline("text-generation",
-                   model=model,
-                   tokenizer=tok,
-                   max_length=60,
-                   do_sample=False)
-para_llm = HuggingFacePipeline(pipeline=hf_pipe)               # jedyny parametr!
+# ---------- VECTORDB ---------- #
+client = PersistentClient(path="chroma_store")
+embedder_raw = SentenceTransformer(config.EMBEDDER_NAME, device="cuda")
+embedder = STEmbeddings(embedder_raw)
 
-# ============ WEKTORY ============ #
-client   = PersistentClient(path="chroma_store")
-embedder_raw = SentenceTransformer(config.EMBEDDER_NAME, device='cuda')
-embedder     = STEmbeddings(embedder_raw)          # <- adapter
-vectordb = Chroma(
-        client          = client,
-        collection_name = config.CHROMA_COLLECTION,
-        embedding_function = embedder)             # już OK
+vectordb = Chroma(client=client, collection_name=config.CHROMA_COLLECTION, embedding_function=embedder)
 
 from langchain_core.prompts import PromptTemplate
+para_prompt = PromptTemplate.from_template("Podaj trzy różne parafrazy pytania – każdą w nowej linii:\n{question}")
 
-para_prompt = PromptTemplate.from_template(
-    "Podaj cztery różne parafrazy pytania – każdą w nowej linii:\n{question}"
-)
+multi_retriever = MultiQueryRetriever.from_llm(retriever=vectordb.as_retriever(search_kwargs={"k": config.TOP_K}), llm=para_llm, prompt=para_prompt)
 
-multi_retriever = MultiQueryRetriever.from_llm(
-        retriever=vectordb.as_retriever(search_kwargs={"k": config.TOP_K}),
-        llm=para_llm,
-        prompt=para_prompt          # <-- zamiast prompt_template / string
-)
+# ---------- CROSS‑ENCODER ---------- #
+cross_encoder = CrossEncoder(config.ENCODER_NAME, max_length=512, device="cuda", tokenizer_kwargs={"truncation": True})
 
-cross_encoder = CrossEncoder(config.ENCODER_NAME,
-                             max_length=512,
-                             device='cuda',
-                             tokenizer_kwargs={'truncation': True})
-
-# ============ BUFORY ============ #
+# ---------- BUFFERS ---------- #
 conversation_buffer: deque[tuple[str, str]] = deque(maxlen=config.MAX_TURNS)
 archived_dialogue: list[str] = []
 running_summary: str = ""
 
-# ============ Wczytanie ustawy ============ #
+# ---------- LOAD ACT ---------- #
 with open(config.JSON_ACT_PATH, encoding="utf-8") as f:
     ACT_DATA = json.load(f)
 
@@ -109,7 +83,7 @@ def get_full_article(ch, art):
     for chapter in ACT_DATA["document"]["chapters"]:
         if str(chapter["number"]) == str(ch):
             for a in chapter["articles"]:
-                if str(a["article"]).replace('.', '') == str(art):
+                if str(a["article"]).replace(".", "") == str(art):
                     body = "\n".join(s["content"] for s in a["subsections"] if s.get("content"))
                     return f"Artykuł {art}, Rozdział {ch}:\n{body}"
     return None
@@ -130,14 +104,16 @@ def summarize_dialogue(text):
     inp = tok(prompt, return_tensors="pt", truncation=True, max_length=1024).to(model.device)
     inp.pop("token_type_ids", None)
     with torch.inference_mode():
-        out = model.generate(**inp, max_new_tokens=64, repetition_penalty=1.1,
-                             eos_token_id=tok.eos_token_id, pad_token_id=tok.eos_token_id)
+        out = model.generate(**inp, max_new_tokens=64, repetition_penalty=1.1, eos_token_id=tok.eos_token_id, pad_token_id=tok.eos_token_id)
     return tok.decode(out[0], skip_special_tokens=True).split("Streszczenie:")[-1].strip()
 
-def infer_verbosity(q): return "long" if any(t in q.lower() for t in config.LONG_TRIGGERS) else "short"
-def truncate_sentences(txt, lim): return " ".join(re.split(r"(?<=[.!?])\s+", txt.strip())[:lim])
+def infer_verbosity(q):
+    return "long" if any(t in q.lower() for t in config.LONG_TRIGGERS) else "short"
 
-# ============ LOG CSV ============ #
+def truncate_sentences(txt, lim):
+    return " ".join(re.split(r"(?<=[.!?])\s+", txt.strip())[:lim])
+
+# ---------- LOG CSV ---------- #
 with open("rag_answers.csv", "w", newline="", encoding="utf-8") as f:
     csv.writer(f).writerow(["Timestamp", "Question", "Context", "Answer"])
 
@@ -149,7 +125,7 @@ for line in sys.stdin:
     if not question:
         continue
 
-    # --- bufor dialogu ---
+    # ---------- buffers ---------- #
     if len(conversation_buffer) == config.MAX_TURNS:
         u_old, a_old = conversation_buffer.popleft()
         archived_dialogue.append(f"U: {u_old}\nA: {a_old}")
@@ -157,13 +133,22 @@ for line in sys.stdin:
             running_summary += " " + summarize_dialogue("\n".join(archived_dialogue))
             archived_dialogue.clear()
 
-    # --- Multi-Query retrieval ---
+    # ---------- PARAPHRASES (for debug) ---------- #
+    para_prompt_text = para_prompt.format(question=question)
+    try:
+        paras_raw = para_llm(para_prompt_text)
+        paras_text = paras_raw[0]["generated_text"] if isinstance(paras_raw, list) and isinstance(paras_raw[0], dict) and "generated_text" in paras_raw[0] else str(paras_raw)
+    except Exception:
+        paras_text = "(błąd generowania parafraz)"
+    paraphrases = [p.strip() for p in paras_text.split("\n") if p.strip()]
+
+    # ---------- Retrieval ---------- #
     docs = multi_retriever.get_relevant_documents(question)
 
     seen, arts_full = set(), []
     for d in docs:
         meta = d.metadata
-        key  = (str(meta.get("chapter")), str(meta.get("article")))
+        key = (str(meta.get("chapter")), str(meta.get("article")))
         if key not in seen:
             seen.add(key)
             art_full = get_full_article(*key)
@@ -174,53 +159,64 @@ for line in sys.stdin:
         print("⛔ Nie znaleziono adekwatnego artykułu.\n")
         continue
 
-    # --- cross-encoder re-rank ---
-    ce_pairs  = [(question, shorten_article_for_ce(a, tok)) for a in arts_full]
-    scores    = cross_encoder.predict(ce_pairs)
-    top_idx   = np.argsort(scores)[::-1][:3]
+    # ---------- Rerank ---------- #
+    ce_pairs = [(question, shorten_article_for_ce(a, tok)) for a in arts_full]
+    scores   = cross_encoder.predict(ce_pairs)
+    top_idx  = np.argsort(scores)[::-1][:3]
     context_articles = [arts_full[i] for i in top_idx]
-    context   = "\n\n---\n\n".join(context_articles)
+    context  = "\n\n---\n\n".join(context_articles)
 
-    # --- prompt ---
-    summary_block = f"Streszczenie starszej rozmowy:\n{running_summary}\n\n" if running_summary else ""
-    hist_block = "\n".join(f"Użytkownik: {u}\nOdpowiedziałeś: {a}" for u, a in conversation_buffer)
-    if hist_block:
-        hist_block = "Ostatnie wymiany:\n" + hist_block + "\n\n"
-
-    prompt = (
-        summary_block + hist_block +
-        "Pytanie:\n" + question +
-        "\n\nKontekst (pełne artykuły powiązane z pytaniem):\n" + context +
-        "\n\nInstrukcje dla asystenta:\n"
-        "Jesteś asystentem, który ma odpowiadać z zakresu wiedzy o ubezpieczeniach rolniczych, bądź pozytywny "
-        "Napisz pełnymi zdaniami, zrozumiałym językiem. "
-        "Nie powtarzaj słów „z kontekstu wynika”, „na podstawie kontekstu” ani całych fragmentów ustawy. "
-        "Odpowiadaj w punktach. "
-        "Jeżeli z kontekstu nie możesz odpowiedzieć na pytanie, odpowiedz: 'nie mam na ten temat wiedzy, spróbuj doprecyzować pytanie.' "
-        "Unikaj dygresji i nie cytuj dosłownie kontekstu, chyba że to konieczne.\n"
-        "Odpowiedź:"
+    # ---------- Prompt build ---------- #
+    sys_block = (
+        "### System:\n"
+        "Jesteś przyjaznym ekspertem KRUS. Odpowiadasz zwięźle, pełnymi zdaniami, w punktach; "
+        "nie cytujesz ustawy dosłownie, o ile nie jest to konieczne. Jeśli nie wiesz – napisz ‘nie mam na ten temat wiedzy’.\n"
     )
 
+    summary_block = f"### Streszczenie rozmowy:\n{running_summary}\n\n" if running_summary else ""
+
+    hist_block = ""
+    if conversation_buffer:
+        joined = "\n".join(f"U: {u}\nA: {a}" for u, a in conversation_buffer)
+        hist_block = f"### Ostatnie wymiany:\n{joined}\n\n"
+
+    prompt = (
+        sys_block
+        + summary_block
+        + hist_block
+        + f"### User:\n{question}\n\n"
+        + f"### Dokumenty:\n{context}\n\n"
+        + "### Assistant:\n"
+    )
+
+    # ---------- DEBUG PRINTS ---------- #
+    print("\n==================== DEBUG INFO ====================")
+    print("\nFULL PROMPT:\n" + prompt)
+    print("\nPARAPHRASES (MultiQuery):")
+    for i, p in enumerate(paraphrases, 1):
+        print(f"{i}. {p}")
+    print("\nKONTEKSTY (Top 3 po rerank):")
+    for i, art in enumerate(context_articles, 1):
+        snippet = art[:800] + ("…" if len(art) > 800 else "")
+        print(f"\n--- [{i}] ------------------------------\n{snippet}\n")
+    print("===================================================\n")
+
+    # ---------- GENERATE ---------- #
     verbosity = infer_verbosity(question)
     max_sent  = config.MAX_SENT_LONG if verbosity == "long" else config.MAX_SENT_SHORT
 
-    inp = tok(prompt, return_tensors="pt", truncation=True,
-              max_length=4096).to(model.device)
+    inp = tok(prompt, return_tensors="pt", truncation=True, max_length=4096).to(model.device)
     inp.pop("token_type_ids", None)
+    prompt_len = inp["input_ids"].shape[-1]
 
     with torch.inference_mode():
-        out = model.generate(**inp,
-                             max_new_tokens=256 if verbosity == "short" else 512,
-                             repetition_penalty=1.25,
-                             eos_token_id=tok.eos_token_id,
-                             pad_token_id=tok.eos_token_id)
+        gen_ids = model.generate(**inp, max_new_tokens=400 if verbosity == "long" else 256, repetition_penalty=1.15, eos_token_id=tok.eos_token_id, pad_token_id=tok.eos_token_id)[0]
 
-    answer = truncate_sentences(tok.decode(out[0], skip_special_tokens=True)
-                                .split("Odpowiedź:")[-1].strip(),
-                                max_sent)
+    raw_answer = tok.decode(gen_ids[prompt_len:], skip_special_tokens=True).strip()
+    answer = truncate_sentences(raw_answer, max_sent)
 
-    print("\nOdpowiedź:\n" + answer + "\n")
-    print("\n--- Kontekst użyty ---\n" + context[:800] + ("\n…" if len(context) > 800 else ""))
+    # ---------- OUTPUT ---------- #
+    print("Odpowiedź:\n" + answer + "\n")
 
     conversation_buffer.append((question, answer))
     with open("rag_answers.csv", "a", newline="", encoding="utf-8") as f:
