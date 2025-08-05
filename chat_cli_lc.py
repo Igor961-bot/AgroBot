@@ -52,7 +52,7 @@ class STEmbeddings(Embeddings):
         return self.model.encode(texts, batch_size=32).tolist()
 
 # ---------- PARAPHRASE LLM ---------- #
-hf_pipe = pipeline("text-generation", model=model, tokenizer=tok, max_length=128, do_sample=False)
+hf_pipe = pipeline("text-generation", model=model, tokenizer=tok, max_new_tokens=64, do_sample=False)
 para_llm = HuggingFacePipeline(pipeline=hf_pipe)
 
 # ---------- VECTORDB ---------- #
@@ -63,7 +63,7 @@ embedder = STEmbeddings(embedder_raw)
 vectordb = Chroma(client=client, collection_name=config.CHROMA_COLLECTION, embedding_function=embedder)
 
 from langchain_core.prompts import PromptTemplate
-para_prompt = PromptTemplate.from_template("Podaj trzy różne parafrazy pytania – każdą w nowej linii:\n{question}")
+para_prompt = PromptTemplate.from_template("Podaj dwie różne parafrazy pytania – każdą w nowej linii:\n{question}")
 
 multi_retriever = MultiQueryRetriever.from_llm(retriever=vectordb.as_retriever(search_kwargs={"k": config.TOP_K}), llm=para_llm, prompt=para_prompt)
 
