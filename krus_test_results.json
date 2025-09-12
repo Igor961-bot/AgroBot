@@ -1,0 +1,772 @@
+{
+  "timestamp": "2025-09-11T12:32:08.643338",
+  "summary": {
+    "accuracy": 0.39473684210526316,
+    "f1_score": 0.3896754080322758,
+    "precision": 0.39337860780984724,
+    "recall": 0.39473684210526316
+  },
+  "test_pairs_count": 76,
+  "detailed_results": [
+    {
+      "question_a": "Kto podlega ubezpieczeniu społecznemu rolników?",
+      "question_b": "Jakie osoby są objęte ubezpieczeniem w KRUS?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5085628032684326,
+      "similarity_score": 0.49143722653388977,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Czy rolnik musi mieć obywatelstwo polskie aby podlegać ubezpieczeniu?",
+      "question_b": "Jakie wymagania obywatelskie są dla ubezpieczenia rolników?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5089511871337891,
+      "similarity_score": 0.4910488426685333,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Co to jest gospodarstwo rolne w rozumieniu ustawy?",
+      "question_b": "Jak definiuje się gospodarstwo rolne dla celów ubezpieczenia?",
+      "true_label": 1,
+      "predicted_label": 1,
+      "confidence": 0.507594883441925,
+      "similarity_score": 0.507594883441925,
+      "category": "podobne",
+      "correct": true
+    },
+    {
+      "question_a": "Kto to jest domownik rolnika?",
+      "question_b": "Jakie warunki musi spełnić domownik aby podlegać ubezpieczeniu?",
+      "true_label": 1,
+      "predicted_label": 1,
+      "confidence": 0.5041972994804382,
+      "similarity_score": 0.5041972994804382,
+      "category": "podobne",
+      "correct": true
+    },
+    {
+      "question_a": "Co to jest pomocnik rolnika?",
+      "question_b": "Kto może być pomocnikiem rolnika w rozumieniu ustawy?",
+      "true_label": 1,
+      "predicted_label": 1,
+      "confidence": 0.5022432208061218,
+      "similarity_score": 0.5022432208061218,
+      "category": "podobne",
+      "correct": true
+    },
+    {
+      "question_a": "Ile wynosi składka na ubezpieczenie emerytalno-rentowe?",
+      "question_b": "Jaka jest wysokość miesięcznej składki emerytalno-rentowej?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5078083872795105,
+      "similarity_score": 0.49219152331352234,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Kto opłaca składki za ubezpieczonego?",
+      "question_b": "Który rolnik jest zobowiązany do opłacania składek?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5074408054351807,
+      "similarity_score": 0.49255919456481934,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Kiedy składki stają się wymagalne?",
+      "question_b": "Jaki jest termin płatności składek na ubezpieczenie?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5024287104606628,
+      "similarity_score": 0.4975712299346924,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Co to jest dodatkowa składka dla gospodarstw powyżej 50 ha?",
+      "question_b": "Jaka dodatkowa składka dotyczy większych gospodarstw?",
+      "true_label": 1,
+      "predicted_label": 1,
+      "confidence": 0.5088343024253845,
+      "similarity_score": 0.5088343024253845,
+      "category": "podobne",
+      "correct": true
+    },
+    {
+      "question_a": "Czy można otrzymać ulgę w składkach?",
+      "question_b": "Na jakich zasadach przyznawane są ulgi składkowe?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5032467842102051,
+      "similarity_score": 0.49675315618515015,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "W jakim wieku można otrzymać emeryturę rolniczą?",
+      "question_b": "Kiedy rolnik może przejść na emeryturę?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5084879398345947,
+      "similarity_score": 0.4915120601654053,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Ile lat ubezpieczenia jest wymagane do emerytury?",
+      "question_b": "Jaki okres ubezpieczenia jest potrzebny na emeryturę rolniczą?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5158920288085938,
+      "similarity_score": 0.48410800099372864,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Co to jest wcześniejsza emerytura rolnicza?",
+      "question_b": "Kiedy można otrzymać emeryturę przed osiągnięciem wieku emerytalnego?",
+      "true_label": 1,
+      "predicted_label": 1,
+      "confidence": 0.5035154819488525,
+      "similarity_score": 0.5035154819488525,
+      "category": "podobne",
+      "correct": true
+    },
+    {
+      "question_a": "Czy muszę zaprzestać działalności rolniczej aby otrzymać emeryturę?",
+      "question_b": "Jakie warunki dotyczą zaprzestania prowadzenia gospodarstwa?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5083134770393372,
+      "similarity_score": 0.49168646335601807,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Jak oblicza się wysokość emerytury rolniczej?",
+      "question_b": "Z czego składa się kwota emerytury w KRUS?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5159238576889038,
+      "similarity_score": 0.4840761423110962,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Komu przysługuje renta z tytułu niezdolności do pracy?",
+      "question_b": "Kto może otrzymać rentę inwalidzką rolniczą?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5093722939491272,
+      "similarity_score": 0.490627646446228,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Co to jest renta okresowa?",
+      "question_b": "Czym różni się renta okresowa od stałej?",
+      "true_label": 1,
+      "predicted_label": 1,
+      "confidence": 0.5081024169921875,
+      "similarity_score": 0.5081024169921875,
+      "category": "podobne",
+      "correct": true
+    },
+    {
+      "question_a": "Kiedy przysługuje renta szkoleniowa?",
+      "question_b": "W jakich przypadkach można otrzymać rentę szkoleniową?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5017989873886108,
+      "similarity_score": 0.4982009530067444,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Komu przysługuje renta rodzinna?",
+      "question_b": "Kto jest uprawniony do renty po zmarłym rolniku?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5106804370880127,
+      "similarity_score": 0.48931965231895447,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Jak długo wypłaca się rentę rodzinną?",
+      "question_b": "Jakie są warunki pobierania renty rodzinnej?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.517645537853241,
+      "similarity_score": 0.4823545515537262,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Kiedy przysługuje zasiłek chorobowy?",
+      "question_b": "Po jakim czasie niezdolności do pracy można otrzymać zasiłek?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5046221017837524,
+      "similarity_score": 0.49537792801856995,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Ile trwa wypłata zasiłku chorobowego?",
+      "question_b": "Jaki jest maksymalny okres pobierania zasiłku chorobowego?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5157127380371094,
+      "similarity_score": 0.484287291765213,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Co to jest jednorazowe odszkodowanie?",
+      "question_b": "Kiedy można otrzymać odszkodowanie z tytułu wypadku?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5016251802444458,
+      "similarity_score": 0.4983748197555542,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Jak ustala się wysokość jednorazowego odszkodowania?",
+      "question_b": "Od czego zależy kwota odszkodowania za wypadek?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5183901786804199,
+      "similarity_score": 0.4816098213195801,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Co to jest wypadek przy pracy rolniczej?",
+      "question_b": "Jak definiuje się wypadek w gospodarstwie rolnym?",
+      "true_label": 1,
+      "predicted_label": 1,
+      "confidence": 0.5078691244125366,
+      "similarity_score": 0.5078691244125366,
+      "category": "podobne",
+      "correct": true
+    },
+    {
+      "question_a": "Komu przysługuje zasiłek macierzyński?",
+      "question_b": "Kto może otrzymać zasiłek macierzyński w KRUS?",
+      "true_label": 1,
+      "predicted_label": 1,
+      "confidence": 0.5025784373283386,
+      "similarity_score": 0.5025784373283386,
+      "category": "podobne",
+      "correct": true
+    },
+    {
+      "question_a": "Jak długo wypłaca się zasiłek macierzyński?",
+      "question_b": "Jaki jest okres wypłaty zasiłku macierzyńskiego?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5179497003555298,
+      "similarity_score": 0.4820502996444702,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Ile wynosi zasiłek macierzyński?",
+      "question_b": "Jaka jest wysokość zasiłku macierzyńskiego?",
+      "true_label": 1,
+      "predicted_label": 1,
+      "confidence": 0.5008125901222229,
+      "similarity_score": 0.5008125901222229,
+      "category": "podobne",
+      "correct": true
+    },
+    {
+      "question_a": "Czy ojciec może otrzymać zasiłek macierzyński?",
+      "question_b": "W jakich przypadkach zasiłek macierzyński przysługuje ojcu?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.507824182510376,
+      "similarity_score": 0.492175817489624,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Kiedy zawiesza się wypłatę renty?",
+      "question_b": "W jakich przypadkach renta nie jest wypłacana?",
+      "true_label": 1,
+      "predicted_label": 1,
+      "confidence": 0.5037482976913452,
+      "similarity_score": 0.5037482976913452,
+      "category": "podobne",
+      "correct": true
+    },
+    {
+      "question_a": "Co oznacza zaprzestanie działalności rolniczej?",
+      "question_b": "Jak należy rozumieć zaprzestanie prowadzenia gospodarstwa?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5111131072044373,
+      "similarity_score": 0.48888683319091797,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Czy można prowadzić działalność podczas pobierania renty?",
+      "question_b": "Jakie ograniczenia dotyczą rencistów prowadzących gospodarstwo?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5016947388648987,
+      "similarity_score": 0.4983052611351013,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Jak złożyć wniosek o emeryturę?",
+      "question_b": "Jaki jest tryb składania wniosków o świadczenia?",
+      "true_label": 1,
+      "predicted_label": 1,
+      "confidence": 0.5013758540153503,
+      "similarity_score": 0.5013758540153503,
+      "category": "podobne",
+      "correct": true
+    },
+    {
+      "question_a": "Gdzie można złożyć wniosek o rentę?",
+      "question_b": "Do jakiego organu składa się wnioski rentowe?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5040236115455627,
+      "similarity_score": 0.49597635865211487,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Kto wydaje decyzje w sprawach ubezpieczenia?",
+      "question_b": "Który organ rozpatruje wnioski o świadczenia?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.511463463306427,
+      "similarity_score": 0.488536536693573,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Czy można odwołać się od decyzji KRUS?",
+      "question_b": "Jaki jest tryb odwoławczy w sprawach ubezpieczeniowych?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5046277046203613,
+      "similarity_score": 0.49537232518196106,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Z czego finansowane są świadczenia emerytalno-rentowe?",
+      "question_b": "Skąd pochodzą środki na emerytury i renty?",
+      "true_label": 1,
+      "predicted_label": 1,
+      "confidence": 0.5018976330757141,
+      "similarity_score": 0.5018976330757141,
+      "category": "podobne",
+      "correct": true
+    },
+    {
+      "question_a": "Co to jest fundusz składkowy?",
+      "question_b": "Jak funkcjonuje fundusz składkowy KRUS?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5013366937637329,
+      "similarity_score": 0.4986633062362671,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Czy państwo gwarantuje wypłatę świadczeń?",
+      "question_b": "Jakie są gwarancje wypłaty emerytur i rent?",
+      "true_label": 1,
+      "predicted_label": 0,
+      "confidence": 0.5030343532562256,
+      "similarity_score": 0.4969657063484192,
+      "category": "podobne",
+      "correct": false
+    },
+    {
+      "question_a": "Ile wynosi emerytura rolnicza?",
+      "question_b": "Jak ubezpieczyć maszyny rolnicze?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5162045359611511,
+      "similarity_score": 0.48379549384117126,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Kiedy można przejść na emeryturę?",
+      "question_b": "Gdzie kupić nasiona zbóż?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5026963949203491,
+      "similarity_score": 0.49730363488197327,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Co to jest zasiłek chorobowy?",
+      "question_b": "Ile kosztuje certyfikat ekologiczny?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5039061903953552,
+      "similarity_score": 0.5039061903953552,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Kto może być domownikiem?",
+      "question_b": "Jakie są ceny skupu pszenicy?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5045432448387146,
+      "similarity_score": 0.495456725358963,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Jak obliczyć składkę emerytalno-rentową?",
+      "question_b": "Kiedy siać kukurydzę?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5000555515289307,
+      "similarity_score": 0.5000555515289307,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Ile wynosi zasiłek macierzyński?",
+      "question_b": "Kiedy przysługuje dodatek pielęgnacyjny?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.510010838508606,
+      "similarity_score": 0.48998919129371643,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Co to jest renta szkoleniowa?",
+      "question_b": "Ile wynosi zasiłek pogrzebowy?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5017239451408386,
+      "similarity_score": 0.5017239451408386,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Kiedy przysługuje emerytura?",
+      "question_b": "Jak otrzymać jednorazowe odszkodowanie?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5078373551368713,
+      "similarity_score": 0.4921625852584839,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Co to jest renta rodzinna?",
+      "question_b": "Ile trwa zasiłek chorobowy?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5007213354110718,
+      "similarity_score": 0.5007213354110718,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Kto płaci składki?",
+      "question_b": "Komu przysługuje rehabilitacja?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5099166035652161,
+      "similarity_score": 0.4900834262371063,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Gdzie złożyć wniosek o emeryturę?",
+      "question_b": "Jak odwołać się od decyzji podatkowej?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5016402006149292,
+      "similarity_score": 0.5016402006149292,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Kto wydaje decyzje rentowe?",
+      "question_b": "Gdzie rejestrować ciągnik?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5086540579795837,
+      "similarity_score": 0.49134591221809387,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Jak obliczyć okres ubezpieczenia?",
+      "question_b": "Gdzie zgłosić szkodę w uprawach?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5008424520492554,
+      "similarity_score": 0.5008424520492554,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Co to jest orzeczenie lekarskie?",
+      "question_b": "Jak uzyskać pozwolenie na budowę?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5015151500701904,
+      "similarity_score": 0.5015151500701904,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Co to jest gospodarstwo rolne?",
+      "question_b": "Ile wynosi minimalne wynagrodzenie?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5076291561126709,
+      "similarity_score": 0.5076291561126709,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Kto to jest pomocnik rolnika?",
+      "question_b": "Co to jest działalność gospodarcza?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5007806420326233,
+      "similarity_score": 0.5007806420326233,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Jakie są warunki ubezpieczenia?",
+      "question_b": "Jakie są normy jakości żywności?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5004474520683289,
+      "similarity_score": 0.5004474520683289,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Co oznacza zaprzestanie działalności?",
+      "question_b": "Co to jest certyfikat pochodzenia?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5079305768013,
+      "similarity_score": 0.49206942319869995,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Czy można zawiesić składki?",
+      "question_b": "Czy można wyciąć drzewa w lesie?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5030906796455383,
+      "similarity_score": 0.49690940976142883,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Ile dni trwa zasiłek?",
+      "question_b": "Ile dni można przechowywać mleko?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5035971403121948,
+      "similarity_score": 0.5035971403121948,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Co to jest niezdolność do pracy?",
+      "question_b": "Co to jest choroba roślin?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5109917521476746,
+      "similarity_score": 0.5109917521476746,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Kto kontroluje gospodarstwa?",
+      "question_b": "Kto kontroluje jakość produktów?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5024277567863464,
+      "similarity_score": 0.5024277567863464,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Kiedy wypłaca się rentę?",
+      "question_b": "Kiedy można polować na dziki?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5074400901794434,
+      "similarity_score": 0.49255988001823425,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Ile wynosi składka zdrowotna?",
+      "question_b": "Ile wynosi dopłata do biopaliw?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.505566418170929,
+      "similarity_score": 0.49443352222442627,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Co to jest emerytura podstawowa?",
+      "question_b": "Co to są płatności bezpośrednie?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.503127932548523,
+      "similarity_score": 0.503127932548523,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Jak ustalić prawo do świadczenia?",
+      "question_b": "Jak uzyskać kredyt preferencyjny?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5004889369010925,
+      "similarity_score": 0.49951106309890747,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Gdzie znajduje się siedziba KRUS?",
+      "question_b": "Jakie są obowiązki rolnika wobec zwierząt?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5065627694129944,
+      "similarity_score": 0.4934372007846832,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Kto kieruje Kasą Rolniczą?",
+      "question_b": "Kto może prowadzić hodowlę trzody?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5100895762443542,
+      "similarity_score": 0.48991042375564575,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Jak działa Rada Rolników?",
+      "question_b": "Jak działa giełda rolna?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5030021667480469,
+      "similarity_score": 0.4969978332519531,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Co to jest fundusz motywacyjny?",
+      "question_b": "Co to są rezerwy zbożowe?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5054939985275269,
+      "similarity_score": 0.5054939985275269,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Od kiedy obowiązuje nowa ustawa?",
+      "question_b": "Ile trwa okres wegetacji rzepaku?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.506550669670105,
+      "similarity_score": 0.49344927072525024,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Kiedy wchodzą zmiany składek?",
+      "question_b": "Kiedy kończy się rok gospodarczy?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5024463534355164,
+      "similarity_score": 0.5024463534355164,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Ile lat działa KRUS?",
+      "question_b": "Ile lat żyje krowa?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5109052062034607,
+      "similarity_score": 0.4890947937965393,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Czy można łączyć emerytury?",
+      "question_b": "Czy można łączyć odmiany zbóż?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5117849707603455,
+      "similarity_score": 0.5117849707603455,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Co to jest współubezpieczenie?",
+      "question_b": "Co to jest współpraca producentów?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5065345168113708,
+      "similarity_score": 0.5065345168113708,
+      "category": "niepodobne",
+      "correct": false
+    },
+    {
+      "question_a": "Jak zweryfikować prawo do świadczenia?",
+      "question_b": "Jak zweryfikować jakość gleby?",
+      "true_label": 0,
+      "predicted_label": 0,
+      "confidence": 0.5008338093757629,
+      "similarity_score": 0.49916622042655945,
+      "category": "niepodobne",
+      "correct": true
+    },
+    {
+      "question_a": "Co oznacza ustanie ubezpieczenia?",
+      "question_b": "Co oznacza ustanie działalności weterynaryjnej?",
+      "true_label": 0,
+      "predicted_label": 1,
+      "confidence": 0.5152645111083984,
+      "similarity_score": 0.5152645111083984,
+      "category": "niepodobne",
+      "correct": false
+    }
+  ]
+}
