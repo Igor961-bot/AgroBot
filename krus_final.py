@@ -6,7 +6,7 @@ os.environ["LANGCHAIN_PROJECT"] = "KRUS-debug"
 
 from huggingface_hub import login
 
-login("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")
+login("")
 
 
 sorDEBUG = True
@@ -135,6 +135,12 @@ K_FINAL = globals().get("K_FINAL", 6)
 RERANK_THRESHOLD = globals().get("RERANK_THRESHOLD", None) 
 RERANKER_MODEL = globals().get("RERANKER_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2")
 
+
+K_SIM = globals().get("K_SIM", 12)
+K_FINAL = globals().get("K_FINAL", 6)
+RERANK_THRESHOLD = globals().get("RERANK_THRESHOLD", None) 
+RERANKER_MODEL = globals().get("RERANKER_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2")
+
 import os, re, shutil, unicodedata, asyncio
 from typing import List, Optional, Dict, Any, Tuple, Callable
 import numpy as np
@@ -174,6 +180,20 @@ if "db" not in globals():
     raise RuntimeError("Brak globalnej bazy `db` (Chroma). Zainicjalizuj ją przed załadowaniem skryptu.")
 
 model = gen_model
+
+ROLE_CUT_RE = re.compile(
+    r"(?i)"                              
+    r"(###\s*(?:user|asystent|dokumenty|system)?\s*:?" 
+    r"|(?:^|\s)(?:user|asystent|dokumenty|system)\s*:" 
+    r"|<\s*(?:user|assistant|docs?|system)\s*>)"      
+)
+
+def cut_after_role_markers(s: str) -> str:
+    if not s:
+        return s
+    m = ROLE_CUT_RE.search(s)
+    return s[:m.start()].rstrip() if m else s
+
 
 if globals().get("model", None) is None or globals().get("tokenizer", None) is None:
     raise RuntimeError("Załaduj wcześniej LLM do zmiennych `model` i `tokenizer`.")
@@ -461,6 +481,7 @@ def _find_last_safe_boundary(s: str) -> int | None:
 def trim_incomplete_sentences(text: str) -> str:
     if not text:
         return text
+    text = cut_after_role_markers(text)
     s = _rstrip_u(text)
     changed = True
     while changed:
@@ -676,4 +697,3 @@ def ask(q: str, reset_memory: bool=False):
     raw_answer = trim_incomplete_sentences(strip_markdown_bold(raw_answer)) or raw_answer
     final_text = f"{citations_block}\nOdpowiedź:\n{raw_answer}"
     return _finalize_return(final_text, docs, mode="new_query")
-
