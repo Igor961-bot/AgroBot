@@ -73,8 +73,8 @@ EMBEDDER_MODEL_T = "intfloat/multilingual-e5-large"
 EMBEDDER_MODEL_U   = "intfloat/multilingual-e5-base"
 RERANKER_MODEL_U   = "radlab/polish-cross-encoder"
 
-CSV_DIR = "C:/Users/admin/Desktop/KRUS-data-/all_dane/all_data (13).csv"
-DATA_PATH = "C:/Users/admin/Desktop/krus-chatbot/AgroBot/data/ustawa_with_paragraph_headers.md"
+CSV_DIR = "all_dane/all_data (13).csv"
+DATA_PATH = "data/ustawa_with_paragraph_headers.md"
 PERSIST_PATH = "chroma_ustawa"
 PERSIST_DIR = "chroma_statystyki"
 
