@@ -1,153 +1,10 @@
 
 import os
-os.environ["LANGCHAIN_API_KEY"] = "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"
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"] = "KRUS-debug"
-
 from huggingface_hub import login
-
-login("")
-
-
-sorDEBUG = True
-DEBUG = sorDEBUG
-RETURN_STRING_WHEN_DEBUG_FALSE = True
-
-
-DATA_PATH = "C:/Users/admin/Desktop/krus-chatbot/AgroBot/data/ustawa_with_paragraph_headers.md"
-PERSIST_PATH = "chroma_ustawa"
-
-EMBEDDER_MODEL   = "intfloat/multilingual-e5-small"
-RERANKER_MODEL   = "radlab/polish-cross-encoder"
-CLASSIFIER_MODEL = "klasyfikator" 
-BASE_MODEL_ID    = "speakleash/Bielik-11B-v2.6-Instruct"
-#"CYFRAGOVPL/PLLuM-12B-chat"
-
-RERANK_THRESHOLD = 0.30
-K_SIM   = 10
-K_FINAL = 3
-
-import os, torch, platform
-os.environ["TOKENIZERS_PARALLELISM"] = "true"   
-torch.backends.cuda.matmul.allow_tf32 = True    
-
-from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModelForSequenceClassification
-
-print("PyTorch:", torch.__version__, "| CUDA available:", torch.cuda.is_available(), "| GPUs:", torch.cuda.device_count())
-print("Platform:", platform.platform()) 
-
-try:
-    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_ID, use_fast=True, trust_remote_code=False)
-except Exception as e:
-    print("Fast tokenizer fail → slow:", e)
-    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_ID, use_fast=False)
-
-try:
-    classifier_tok = AutoTokenizer.from_pretrained(CLASSIFIER_MODEL, use_fast=True, trust_remote_code=False)
-except Exception as e:
-    print("Fast classifier tokenizer fail → slow:", e)
-    classifier_tok = AutoTokenizer.from_pretrained(CLASSIFIER_MODEL, use_fast=False)
-
-gen_model = AutoModelForCausalLM.from_pretrained(
-    BASE_MODEL_ID,
-    torch_dtype=torch.bfloat16,      
-    device_map="cuda:0",               
-    low_cpu_mem_usage=False,
-    attn_implementation="sdpa",      
-    trust_remote_code=True,
-).eval()
-
-clf_model = AutoModelForSequenceClassification.from_pretrained(
-    CLASSIFIER_MODEL,
-    torch_dtype=torch.bfloat16 if torch.cuda.is_available() else None,
-    device_map="auto" if torch.cuda.is_available() else None,
-    trust_remote_code=True,
-).eval()
-
-print("oba modele załadowane bez kwantyzacji")
-
-import shutil, re
-from typing import List
-from langchain.docstore.document import Document
-from langchain.embeddings import HuggingFaceBgeEmbeddings
-from langchain.vectorstores import Chroma
-from langchain.document_loaders import TextLoader
-from langchain.text_splitter import MarkdownHeaderTextSplitter
-
-
-persist_path = PERSIST_PATH
-shutil.rmtree(persist_path, ignore_errors=True)
-os.makedirs(persist_path, exist_ok=True)
-
-docs_raw = TextLoader(DATA_PATH, encoding="utf-8").load()
-header_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=[("###", "ustep")])
-chunks = header_splitter.split_text(docs_raw[0].page_content)
-
-# meta: <!-- chapter:1 article:16a paragraph:3 id:ch1-art16a-ust3 -->
-meta_re = re.compile(
-    r"<!--\s*chapter\s*:\s*(\d+)\s+article\s*:\s*([0-9a-z]+)\s+paragraph\s*:\s*([0-9a-z]+)\s+id\s*:\s*([^\s>]+)\s*-->",
-    re.I
-)
-
-normed: List[Document] = []
-for d in chunks:
-    md = dict(d.metadata)
-    header_text = md.get("ustep", "") or ""
-    source_for_meta = header_text + "\n" + d.page_content
-    m = meta_re.search(source_for_meta)
-    if m:
-        md["chapter"]   = int(m.group(1))
-        md["article"]   = m.group(2).lower()
-        md["paragraph"] = m.group(3).lower()
-        md["id"]        = m.group(4)
-        md["rozdzial"]  = md["chapter"]
-        md["artykul"]   = md["article"]
-        md["ust"]       = md["paragraph"]
-
-    clean_header = meta_re.sub("", header_text).strip()
-    if clean_header:
-        md["ustep"] = clean_header
-
-    content = meta_re.sub("", d.page_content).strip()
-    normed.append(Document(page_content=content, metadata=md))
-
-if DEBUG:
-    print(f"[INDEX] Liczba dokumentów (ustępów): {len(normed)}")
-
-embedder = HuggingFaceBgeEmbeddings(
-    model_name=EMBEDDER_MODEL,
-    model_kwargs={'device': 'cuda' if torch.cuda.is_available() else 'cpu'},
-    encode_kwargs={'normalize_embeddings': True}
-)
-
-shutil.rmtree(persist_path, ignore_errors=True)
-db = Chroma.from_documents(
-    documents=normed,
-    embedding=embedder,
-    persist_directory=persist_path,
-    collection_metadata={"hnsw:space": "cosine"}
-)
-db.persist()
-
-
-K_SIM = globals().get("K_SIM", 12)
-K_FINAL = globals().get("K_FINAL", 6)
-RERANK_THRESHOLD = globals().get("RERANK_THRESHOLD", None) 
-RERANKER_MODEL = globals().get("RERANKER_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2")
-
-
-K_SIM = globals().get("K_SIM", 12)
-K_FINAL = globals().get("K_FINAL", 6)
-RERANK_THRESHOLD = globals().get("RERANK_THRESHOLD", None) 
-RERANKER_MODEL = globals().get("RERANKER_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2")
-
-import os, re, shutil, unicodedata, asyncio
-from typing import List, Optional, Dict, Any, Tuple, Callable
+import os, re, unicodedata, asyncio
+from typing import List, Optional, Dict, Callable
 import numpy as np
 import torch
-
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain.memory import ConversationBufferWindowMemory
 from langchain_community.llms import HuggingFacePipeline
 from langchain.prompts import PromptTemplate
@@ -157,16 +14,40 @@ from langchain.callbacks.tracers.langchain import LangChainTracer
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.documents import Document  
 
-# Reranker + LLM
-from sentence_transformers import CrossEncoder
-from transformers import pipeline as hf_pipeline
-from transformers import pipeline
+from resources import db
+from resources import gen_model, tokenizer
+from resources import cross_encoder_ustawa
 
+from transformers import pipeline
 from pydantic import PrivateAttr
 
-from optimum.onnxruntime import ORTModelForSequenceClassification
-from transformers import AutoTokenizer
-import onnxruntime as ort
+login("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")
+
+os.environ["LANGCHAIN_API_KEY"] = "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"
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_PROJECT"] = "KRUS-debug"
+os.environ["TOKENIZERS_PARALLELISM"] = "true"   
+torch.backends.cuda.matmul.allow_tf32 = True  
+
+sorDEBUG = True
+DEBUG = sorDEBUG
+RETURN_STRING_WHEN_DEBUG_FALSE = True
+
+RERANK_THRESHOLD = 0.2
+K_SIM   = 15
+K_FINAL = 5
+
+db = db
+model = gen_model
+cross_encoder = cross_encoder_ustawa
+
+if globals().get("model", None) is None or globals().get("tokenizer", None) is None:
+    raise RuntimeError("Załaduj wcześniej LLM do zmiennych `model` i `tokenizer`.")
+
+if "db" not in globals():
+    raise RuntimeError("Brak globalnej bazy `db` (Chroma). Zainicjalizuj ją przed załadowaniem skryptu.")
+
+#------------------------------------------------ funkcje pomocnicze ------------------------------------------------
 
 def strip_accents_lower(s: str) -> str:
     if not s:
@@ -174,12 +55,6 @@ def strip_accents_lower(s: str) -> str:
     s = unicodedata.normalize("NFKD", s)
     s = "".join(ch for ch in s if not unicodedata.combining(ch))
     return s.lower().strip()
-
-
-if "db" not in globals():
-    raise RuntimeError("Brak globalnej bazy `db` (Chroma). Zainicjalizuj ją przed załadowaniem skryptu.")
-
-model = gen_model
 
 ROLE_CUT_RE = re.compile(
     r"(?i)"                              
@@ -193,65 +68,6 @@ def cut_after_role_markers(s: str) -> str:
         return s
     m = ROLE_CUT_RE.search(s)
     return s[:m.start()].rstrip() if m else s
-
-
-if globals().get("model", None) is None or globals().get("tokenizer", None) is None:
-    raise RuntimeError("Załaduj wcześniej LLM do zmiennych `model` i `tokenizer`.")
-
-# reranker z ONNX na CPU
-device = "cpu"
-
-class OptimizedONNXCrossEncoder:
-    def __init__(self, model_name, device="cpu"):
-        self.device = device
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        
-        providers = ["CPUExecutionProvider"]
-        
-        try:
-            self.model = ORTModelForSequenceClassification.from_pretrained(
-                model_name,
-                provider=providers[0],
-                export=True
-            )
-            print("ONNX Cross Encoder załadowany na CPU!")
-        except Exception as e:
-            print(f"Fallback do zwykłego CrossEncoder na CPU: {e}")
-            from sentence_transformers import CrossEncoder
-            self.fallback_model = CrossEncoder(model_name, device="cpu")
-            self.model = None
-    
-    def predict(self, pairs, batch_size=32, **kwargs):
-        if self.model is None:
-            return self.fallback_model.predict(pairs, batch_size=batch_size)
-        
-        all_scores = []
-        for i in range(0, len(pairs), batch_size):
-            batch = pairs[i:i+batch_size]
-            texts_1 = [p[0] for p in batch]
-            texts_2 = [p[1] for p in batch]
-            
-            inputs = self.tokenizer(
-                texts_1, texts_2,
-                padding=True,
-                truncation=True,
-                max_length=512,
-                return_tensors="pt"
-            )
-            
-            with torch.no_grad():
-                outputs = self.model(**inputs)
-                if outputs.logits.shape[-1] == 2:
-                    scores = torch.softmax(outputs.logits, dim=-1)[:, 1]
-                else:
-                    scores = outputs.logits[:, 0]
-                scores = scores.cpu().numpy()
-                all_scores.extend(scores.tolist())
-        
-        return np.array(all_scores)
-
-cross_encoder = OptimizedONNXCrossEncoder(RERANKER_MODEL, device=device)
-
 
 REF_RE_EXT = re.compile(
     r"(?:art\.?\s*(?P<art>[0-9]+[a-z]?))"
@@ -272,112 +88,7 @@ def parse_ref_ext(query: str) -> Optional[Dict[str, str]]:
     if m.group("lit"): ref["litera"]    = m.group("lit").lower()
     return ref if ref else None
 
-#retriever + reranker
-def retrieve_basic(query: str, k_sim: int = K_SIM, k_final: int = K_FINAL, rerank_threshold: float | None = RERANK_THRESHOLD) -> List[Document]:
-    ref = parse_ref_ext(query)
-    filter_dict = {}
-    if ref:
-        if "article" in ref:   filter_dict["article"]   = ref["article"]
-        if "paragraph" in ref: filter_dict["paragraph"] = ref["paragraph"]
-    if not filter_dict:
-        filter_dict = None
 
-    docs = db.similarity_search(query, k=k_sim, filter=filter_dict)
-    if not docs:
-        return []
-
-    pairs = [(query, d.page_content) for d in docs]
-    scores = cross_encoder.predict(pairs, batch_size=32) 
-    scores = np.asarray(scores, dtype=float)
-
-    scored_docs = [(d, s) for d, s in zip(docs, scores)]
-    if rerank_threshold is not None:
-        scored_docs = [(d, s) for d, s in scored_docs if s >= rerank_threshold]
-        if not scored_docs:
-            return []
-
-    scored_docs = sorted(scored_docs, key=lambda x: x[1], reverse=True)[:k_final]
-    out: List[Document] = []
-    for d, s in scored_docs:
-        md = dict(d.metadata or {})
-        md["rerank_score"] = float(s)
-        d.metadata = md
-        out.append(d)
-    return out
-
-#memory + LLM
-memory = ConversationBufferWindowMemory(
-    k=3, memory_key="chat_history", return_messages=True, output_key="answer"
-)
-
-hf_pipe = pipeline(
-    "text-generation",
-    model=globals().get("model"),
-    tokenizer=globals().get("tokenizer"),
-    max_new_tokens=512,
-    do_sample=True,
-    temperature=0.35,
-    top_p=0.95,
-    top_k=50,
-    repetition_penalty=1.0,
-    pad_token_id=(getattr(globals().get("tokenizer"), "eos_token_id", None)),
-    eos_token_id=(getattr(globals().get("tokenizer"), "eos_token_id", None)),
-    return_full_text=False,
-    use_cache=True,
-    batch_size=1,  
-    num_beams=1,
-)
-llm = HuggingFacePipeline(pipeline=hf_pipe)
-
-prompt = PromptTemplate(
-    input_variables=["context", "question"],
-    template=(
-        "### System:\n"
-        "Jesteś ekspertem prawa ubezpieczeń społecznych rolników. "
-        "Odpowiadasz WYŁĄCZNIE na podstawie Dokumentów poniżej. "
-        "Twoim zadaniem jest odpowiedzenie na pytanie najlepiej jak możesz wyłącznie na podstawie Dokumentów. "
-        "Nie zmyślaj informacji i jeśli w dokumentach brak odpowiedzi, poinformuj o tym.\n"
-        "Formatowanie: nie używaj formatowania Markdown (**…**) ani __…__.\n"
-        "Napisz maksymalnie 6-8 zdań lub 8 punktów."
-        "### User:\n{question}\n\n"
-        "### Dokumenty:\n{context}\n"
-        "### Asystent:\n"
-    )
-)
-
-tracer = LangChainTracer()
-callback_manager = CallbackManager([tracer])
-
-class FunctionRetriever(BaseRetriever):
-    k_sim: int
-    k_final: int
-    rerank_threshold: Optional[float] = None
-    _fn: Callable[..., List[Document]] = PrivateAttr()
-
-    def __init__(self, fn: Callable[..., List[Document]], **data):
-        super().__init__(**data)
-        self._fn = fn
-
-    def _get_relevant_documents(self, query: str) -> List[Document]:
-        return self._fn(query, k_sim=self.k_sim, k_final=self.k_final, rerank_threshold=self.rerank_threshold)
-
-    async def _aget_relevant_documents(self, query: str) -> List[Document]:
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, lambda: self._get_relevant_documents(query))
-
-init_retriever = FunctionRetriever(fn=retrieve_basic, k_sim=K_SIM, k_final=K_FINAL, rerank_threshold=RERANK_THRESHOLD)
-
-qa_chain = ConversationalRetrievalChain.from_llm(
-    llm=llm,
-    retriever=init_retriever,
-    memory=memory,
-    combine_docs_chain_kwargs={"prompt": prompt},
-    return_source_documents=True,
-    output_key="answer",
-    callback_manager=callback_manager
-)
-
-#formatowanie odpowiedzi
 def _build_citations_block(docs: List[Document]) -> str:
     if not docs:
         return "Cytowane ustępy:\n(brak)\n"
@@ -499,17 +210,12 @@ def trim_incomplete_sentences(text: str) -> str:
     return _rstrip_u(s[:cut])
 
 def _finalize_return(text: str, docs: List[Document], mode: str):
+    hint = "\n\n(Jeśli chcesz dopytać, kliknij „Chciałbym dopytać”, a dodam kolejny ustęp do kontekstu.)"
+    text_out = text + hint
+
     debug = [{"id": (d.metadata or {}).get("id"),
               "score": (d.metadata or {}).get("rerank_score")} for d in (docs or [])]
-    payload = {"answer": text, "source_documents": docs, "debug": {"mode": mode, "rerank": debug}}
-
-    if DEBUG:
-        print("\nODPOWIEDŹ\n", text,
-              "\n\n *Mogę popełniać błędy, skonsultuj się z placówką KRUS w celu potwierdzenia informacji.*\n")
-        return payload
-
-    if RETURN_STRING_WHEN_DEBUG_FALSE:
-        return text
+    payload = {"answer": text_out, "source_documents": docs, "debug": {"mode": mode, "rerank": debug}}
     return payload
 
 _SMALLTALK_RULES = [
@@ -524,52 +230,6 @@ def smalltalk_reply(user_q: str) -> Optional[str]:
         if re.search(pat, qn, flags=re.IGNORECASE):
             return resp
     return None
-
-#context judge
-CTX_JUDGE_MODEL = "joeddav/xlm-roberta-large-xnli"
-ctx_judge = hf_pipeline(
-    "zero-shot-classification",
-    model=CTX_JUDGE_MODEL,
-    device=1 if torch.cuda.is_available() else -1
-)
-
-CTX_YES_MIN = 0.60
-CTX_NO_MIN  = 0.60
-CTX_MARGIN  = 0.12
-
-def judge_contextual(prev_q: str, curr_q: str) -> Tuple[Optional[bool], float, Dict[str, float]]:
-    if not prev_q or not curr_q:
-        return None, 0.0, {}
-    seq = (
-        f"Pytanie A: {prev_q}\n"
-        f"Pytanie B: {curr_q}\n"
-        f"Czy Pytanie B jest dopytaniem/uzupełnieniem/jest powiązane do Pytania A?"
-    )
-    out = ctx_judge(
-        sequences=seq,
-        candidate_labels=["TAK", "NIE"],
-        hypothesis_template="To jest {}."
-    )
-    dist = {lbl.upper(): float(score) for lbl, score in zip(out["labels"], out["scores"])}
-    yes, no = dist.get("TAK", 0.0), dist.get("NIE", 0.0)
-    margin = abs(yes - no)
-    if DEBUG:
-        print(f"[CTX-JUDGE] dist={dist} margin={margin:.2f}")
-    if yes >= CTX_YES_MIN and margin >= CTX_MARGIN:
-        return True, yes, dist
-    if no >= CTX_NO_MIN and margin >= CTX_MARGIN:
-        return False, no, dist
-    return None, max(yes, no), dist
-
-#conversation state
-class ConversationState:
-    def __init__(self):
-        self.last_article_num: Optional[str] = None
-        self.last_paragraph_num: Optional[str] = None
-        self.last_docs: List[Document] = []
-        self.last_query: Optional[str] = None
-
-STATE = ConversationState()
 
 def _short_doc_label(d: Document) -> str:
     md = d.metadata or {}
@@ -596,7 +256,6 @@ def rewrite_query(user_q: str) -> str:
     doc_part = f" (odnieś do: {', '.join(doc_labels)})" if doc_labels else ""
     return f"{user_q} — w kontekście poprzedniego pytania: '{base}'{doc_part}"
 
-#router
 def route_query(query: str):
     qn = strip_accents_lower(query)
     ref = parse_ref_ext(query)
@@ -606,23 +265,241 @@ def route_query(query: str):
         return "EXPLICIT_REF", {"ref": ref}
     return "GENERAL", {"query": query}
 
-#restricted answer from docs
+#------------------------------------------------ funkcje główne ------------------------------------------------
+def retrieve_basic(query: str,
+                   k_sim: int = K_SIM,
+                   k_final: int = K_FINAL,
+                   rerank_threshold: float | None = RERANK_THRESHOLD) -> List[Document]:
+    import numpy as _np
+
+    def _doc_pid(md: dict) -> str:
+        if md.get("id"): return str(md["id"])
+        return f"ch{md.get('rozdzial') or md.get('chapter')}-art{md.get('artykul') or md.get('article')}-ust{md.get('ust') or md.get('paragraph')}"
+
+    def _ce_to_prob(arr: _np.ndarray) -> _np.ndarray:
+        arr = _np.asarray(arr, dtype=float)
+        # 1D: jeśli już w [0,1] → zostaw; w innym razie potraktuj jako logit i zrób sigmoid
+        if arr.ndim == 1:
+            if _np.nanmin(arr) >= 0.0 and _np.nanmax(arr) <= 1.0:
+                return arr
+            return 1.0 / (1.0 + _np.exp(-arr))
+        # 2D: klasy (neg,pos) → softmax i bierzemy prawdopodobieństwo ostatniej klasy
+        if arr.ndim == 2 and arr.shape[1] >= 2:
+            x = arr - arr.max(axis=1, keepdims=True)
+            ex = _np.exp(x)
+            sm = ex / _np.clip(ex.sum(axis=1, keepdims=True), 1e-9, None)
+            return sm[:, -1]
+        # awaryjnie: min-max w batchu
+        mn, mx = float(_np.nanmin(arr)), float(_np.nanmax(arr))
+        if mx - mn < 1e-9:
+            return _np.zeros_like(arr, dtype=float)
+        return (arr - mn) / (mx - mn)
+
+    # --- routing / filtr po referencji (jeśli parser coś znalazł) ---
+    ref = parse_ref_ext(query)
+    filter_dict: dict | None = None
+    if ref:
+        f: dict = {}
+        if "article" in ref:   f["article"]   = ref["article"]
+        if "paragraph" in ref: f["paragraph"] = ref["paragraph"]
+        filter_dict = f or None
+    if DEBUG:
+        print(f"[RET] query={query!r} filter={filter_dict}")
+
+    # --- similarity ---
+    docs = db.similarity_search(query, k=k_sim, filter=filter_dict)
+    if DEBUG:
+        print(f"[RET] similarity → {len(docs)} docs")
+        if docs:
+            print("[RET] sample:", [_doc_pid((d.metadata or {})) for d in docs[:min(6, len(docs))]])
+    if not docs:
+        return []
+
+    # --- deduplikacja po PID (często te same ustępy wracają 2×) ---
+    uniq: list[Document] = []
+    seen: set[str] = set()
+    for d in docs:
+        pid = _doc_pid(d.metadata or {})
+        if pid in seen: 
+            continue
+        seen.add(pid)
+        uniq.append(d)
+    docs = uniq
+    if DEBUG:
+        print(f"[RET] after dedupe → {len(docs)} docs")
+
+    # --- CE scoring ---
+    pairs = [(query, d.page_content) for d in docs]
+    raw_scores = cross_encoder.predict(pairs, batch_size=32)
+    raw_scores = _np.asarray(raw_scores, dtype=float)
+    probs = _ce_to_prob(raw_scores)
+
+    if DEBUG:
+        try:
+            print(f"[RET][CE] raw: min={_np.nanmin(raw_scores):.4f} max={_np.nanmax(raw_scores):.4f} mean={_np.nanmean(raw_scores):.4f}")
+        except Exception:
+            pass
+        print(f"[RET][CE] prob: min={_np.nanmin(probs):.4f} max={_np.nanmax(probs):.4f} mean={_np.nanmean(probs):.4f}")
+
+    # --- próg na PROB + sort ---
+    scored_docs = [(d, float(p)) for d, p in zip(docs, probs)]
+    if rerank_threshold is not None:
+        before = len(scored_docs)
+        scored_docs = [(d, s) for d, s in scored_docs if s >= float(rerank_threshold)]
+        if DEBUG:
+            print(f"[RET][THR] >= {rerank_threshold:.3f} → {len(scored_docs)}/{before} docs")
+        if not scored_docs:
+            return []
+
+    scored_docs.sort(key=lambda x: x[1], reverse=True)
+    scored_docs = scored_docs[:k_final]
+
+    # --- dopnij wynik do metadanych i zwróć ---
+    out: List[Document] = []
+    for d, s in scored_docs:
+        md = dict(d.metadata or {})
+        md["rerank_prob"] = float(s)
+        md["rerank_score"] = float(s)   # używamy prob jako score
+        d.metadata = md
+        out.append(d)
+
+    if DEBUG:
+        print("[RET] final:", [(_doc_pid(d.metadata or {}), f"{(d.metadata or {}).get('rerank_score'):.3f}") for d in out])
+    return out
+
+memory = ConversationBufferWindowMemory(
+    k=3, memory_key="chat_history", return_messages=True, output_key="answer"
+)
+
+hf_pipe = pipeline(
+    "text-generation",
+    model=model,
+    tokenizer=tokenizer,
+    max_new_tokens=512,
+    do_sample=True,
+    temperature=0.35,
+    top_p=0.95,
+    top_k=50,
+    repetition_penalty=1.0,
+    pad_token_id=(getattr(globals().get("tokenizer"), "eos_token_id", None)),
+    eos_token_id=(getattr(globals().get("tokenizer"), "eos_token_id", None)),
+    return_full_text=False,
+    use_cache=True,
+    batch_size=1,  
+    num_beams=1,
+)
+llm = HuggingFacePipeline(pipeline=hf_pipe)
+
+prompt_base = PromptTemplate(
+    input_variables=["context", "question"],
+    template=(
+        "### System:\n"
+        "Jesteś ekspertem prawa ubezpieczeń społecznych rolników. "
+        "Odpowiadasz WYŁĄCZNIE na podstawie Dokumentów poniżej. "
+        "Twoim zadaniem jest odpowiedzenie na pytanie na podstawie Dokumentów. "
+        "Jeśli w dokumentach jest BRAK, powiedz, że nie masz wiedzy na ten temat.\n"
+        "Formatowanie: bez **…** ani __…__. Limit 6–8 zdań lub 8 punktów.\n"
+        "### User:\n{question}\n\n"
+        "### Dokumenty:\n{context}\n"
+        "### Asystent:\n"
+    )
+)
+
+prompt_followup = PromptTemplate(
+    input_variables=["context", "question"],
+    template=(
+        "### System:\n"
+        "Kontynuacja rozmowy. Odpowiadaj WYŁĄCZNIE w oparciu o poniższe dokumenty, "
+        "które akumulujemy w toku dopytań użytkownika. "
+        "Jeśli dokumenty nie zawierają odpowiedzi, powiedz o tym wprost.\n"
+        "Format: bez **…** ani __…__. Zwięźle: 5–7 zdań lub 6 punktów.\n"
+        "### User:\n{question}\n\n"
+        "### Dokumenty (skumulowane):\n{context}\n"
+        "### Asystent:\n"
+    )
+)
+
+tracer = LangChainTracer()
+callback_manager = CallbackManager([tracer])
+
+class FunctionRetriever(BaseRetriever):
+    k_sim: int
+    k_final: int
+    rerank_threshold: Optional[float] = None
+    _fn: Callable[..., List[Document]] = PrivateAttr()
+
+    def __init__(self, fn: Callable[..., List[Document]], **data):
+        super().__init__(**data)
+        self._fn = fn
+
+    def _get_relevant_documents(self, query: str) -> List[Document]:
+        return self._fn(query, k_sim=self.k_sim, k_final=self.k_final, rerank_threshold=self.rerank_threshold)
+
+    async def _aget_relevant_documents(self, query: str) -> List[Document]:
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, lambda: self._get_relevant_documents(query))
+
+init_retriever = FunctionRetriever(fn=retrieve_basic, k_sim=K_SIM, k_final=K_FINAL, rerank_threshold=RERANK_THRESHOLD)
+
+qa_chain = ConversationalRetrievalChain.from_llm(
+    llm=llm,
+    retriever=init_retriever,
+    memory=memory,
+    combine_docs_chain_kwargs={"prompt": prompt_base},
+    return_source_documents=True,
+    output_key="answer",
+    callback_manager=callback_manager
+)
+
+class ConversationState:
+    def __init__(self):
+        self.last_article_num: Optional[str] = None
+        self.last_paragraph_num: Optional[str] = None
+        self.last_docs: List[Document] = []
+        self.accum_docs: List[Document] = []   
+        self.last_query: Optional[str] = None
+
+STATE = ConversationState()
+_FOLLOW_UP_NEXT = False
+
+def want_follow_up() -> None:
+    global _FOLLOW_UP_NEXT
+    _FOLLOW_UP_NEXT = True
+
+def reset_context() -> None:
+    STATE.accum_docs.clear()
+    STATE.last_docs.clear()
+    STATE.last_article_num = None
+    STATE.last_paragraph_num = None
+    STATE.last_query = None
+
 def _llm_generate(prompt_tmpl: PromptTemplate, **kwargs) -> str:
     text = prompt_tmpl.format(**kwargs)
     out = llm.invoke(text)
     return (out or "").strip()
 
-def answer_from_docs(question: str, docs: List[Document]):
+def answer_from_docs(question: str, docs: List[Document], *, followup: bool):
     ctx = format_docs_for_prompt(docs) if docs else "(brak dokumentów)"
-    answer = _llm_generate(prompt, question=question, context=ctx)
+    p = prompt_followup if followup else prompt_base
+    answer = _llm_generate(p, question=question, context=ctx)
     answer = trim_incomplete_sentences(strip_markdown_bold(answer)) or answer
     final_text = f"{_build_citations_block(docs)}\nOdpowiedź:\n{answer}"
-    return _finalize_return(final_text, docs, mode="restricted")
+    return _finalize_return(final_text, docs, mode=("follow_up" if followup else "new_query"))
+
 
 #main function
 def ask(q: str, reset_memory: bool=False):
+    """
+    Naprawa: nie obcinaj źródeł do jednego dokumentu.
+    - New query => STATE.accum_docs = wszystkie docs z retrievera.
+    - Follow-up => dobieramy 1 nowy doc (jak było), ale cytujemy całą akumulację.
+    """
     if reset_memory:
-        qa_chain.memory.clear()
+        try:
+            qa_chain.memory.clear()
+        except Exception:
+            pass
+        reset_context()
 
     st = smalltalk_reply(q)
     if st is not None:
@@ -646,54 +523,48 @@ def ask(q: str, reset_memory: bool=False):
         else:
             return _finalize_return("Nie znalazłem takiego artykułu/ustępu.", [], mode="explicit")
 
-    verdict, conf, dist = judge_contextual(STATE.last_query or "", q)
-    if DEBUG:
-        print(f"[INTENT] judge_verdict={verdict} conf={conf:.2f}")
+    global _FOLLOW_UP_NEXT
+    if _FOLLOW_UP_NEXT:
+        _FOLLOW_UP_NEXT = False
 
-    mode = "follow_up" if verdict is True else "new_query"  
-
-    if mode == "follow_up":
-        rewritten = rewrite_query(q)
-        if DEBUG: print(f"[REWRITE:follow_up] {rewritten}")
-
+        # dobieramy 1 nowy dokument (jak wcześniej), ale nie kasujemy poprzednich
         docs_narrow: List[Document] = []
         if STATE.last_article_num:
             flt = {"article": STATE.last_article_num}
-            docs_tmp = db.similarity_search(rewritten, k=K_SIM, filter=flt)
+            docs_tmp = db.similarity_search(q, k=K_SIM, filter=flt)
             if docs_tmp:
-                pairs = [(rewritten, d.page_content) for d in docs_tmp]
+                pairs = [(q, d.page_content) for d in docs_tmp]
                 scores = cross_encoder.predict(pairs, batch_size=32)
                 scored = sorted([(d, float(s)) for d, s in zip(docs_tmp, np.asarray(scores))],
-                                key=lambda x: x[1], reverse=True)[:K_FINAL]
-                for d, s in scored:
-                    md = dict(d.metadata or {}); md["rerank_score"] = s; d.metadata = md
-                    docs_narrow.append(d)
-
-        if not docs_narrow and STATE.last_docs:
-            STATE.last_query = q
-            return answer_from_docs(rewritten, STATE.last_docs)
+                                key=lambda x: x[1], reverse=True)[:1]
+                docs_narrow = [d for d, _ in scored]
 
         if not docs_narrow:
-            res = qa_chain.invoke({"question": rewritten})
-            out_docs = res.get("source_documents", []) or []
-            _update_state_from_docs(out_docs, q)
-            log_rerank_scores(out_docs)
-            citations_block = _build_citations_block(out_docs)
-            raw_answer = (res.get("answer") or "").strip()
-            raw_answer = trim_incomplete_sentences(strip_markdown_bold(raw_answer)) or raw_answer
-            final_text = f"{citations_block}\nOdpowiedź:\n{raw_answer}"
-            return _finalize_return(final_text, out_docs, mode="follow_up→global")
+            top_global = retrieve_basic(q, k_sim=K_SIM, k_final=1, rerank_threshold=RERANK_THRESHOLD)
+            docs_narrow = top_global[:1] if top_global else []
 
-        _update_state_from_docs(docs_narrow, q)
-        return answer_from_docs(rewritten, docs_narrow)
+        def _doc_id(d: Document) -> str:
+            md = d.metadata or {}
+            return md.get("id") or f"ch{md.get('chapter')}-art{md.get('article')}-ust{md.get('paragraph')}"
 
+        seen = {_doc_id(d) for d in STATE.accum_docs}
+        for d in docs_narrow:
+            if _doc_id(d) not in seen:
+                STATE.accum_docs.append(d)
+
+        if STATE.accum_docs:
+            _update_state_from_docs([STATE.accum_docs[0]], q)
+
+        # KLUCZOWE: przekazujemy pełną akumulację, więc „Cytowane ustępy” pokaże wszystkie
+        return answer_from_docs(q, STATE.accum_docs, followup=True)
+
+    # --- NEW QUERY ---
     res = qa_chain.invoke({"question": q})
     docs = res.get("source_documents", []) or []
     _update_state_from_docs(docs, q)
-    log_rerank_scores(docs)
 
-    citations_block = _build_citations_block(docs)
-    raw_answer = (res.get("answer") or "").strip()
-    raw_answer = trim_incomplete_sentences(strip_markdown_bold(raw_answer)) or raw_answer
-    final_text = f"{citations_block}\nOdpowiedź:\n{raw_answer}"
-    return _finalize_return(final_text, docs, mode="new_query")
+    # KLUCZOWE: NIE obcinamy do [docs[0]]
+    STATE.accum_docs = docs[:] if docs else []
+
+    # Pokaż całą listę w cytowaniach i w kontekście LLM
+    return answer_from_docs(q, STATE.accum_docs if STATE.accum_docs else docs, followup=False)
