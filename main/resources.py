@@ -4,6 +4,10 @@
 # wczytac embedder i crossencoder z tabdata
 # stworzyc dwie kolekcje w jednej instacni chormaDB
 # 
+
+from dotenv import load_dotenv
+load_dotenv() 
+
 import os, re, unicodedata
 from typing import List, Dict, Any, Tuple, Optional
 import pandas as pd
@@ -59,24 +63,22 @@ except Exception:
     _HAS_RERANK = False
 
 
-BASE_MODEL_ID    = "speakleash/Bielik-11B-v2.6-Instruct"
+BASE_MODEL_ID    = os.getenv("BASE_MODEL_ID")
 # "speakleash/Bielik-11B-v2.6-Instruct"
 # "CYFRAGOVPL/PLLuM-12B-chat"
 
 # tabele
-RERANKER_MODEL_T = "BAAI/bge-reranker-v2-m3"
-EMBEDDER_MODEL_T = "intfloat/multilingual-e5-large"
+RERANKER_MODEL_T = os.getenv("RERANKER_MODEL_T")
+EMBEDDER_MODEL_T = os.getenv("EMBEDDER_MODEL_T")
 
 # ustawa
-# RERANKER_MODEL_U = "BAAI/bge-reranker-v2-m3"
-# EMBEDDER_MODEL_U = "intfloat/multilingual-e5-large"
-EMBEDDER_MODEL_U   = "intfloat/multilingual-e5-base"
-RERANKER_MODEL_U   = "radlab/polish-cross-encoder"
+EMBEDDER_MODEL_U   = os.getenv("EMBEDDER_MODEL_U")
+RERANKER_MODEL_U   = os.getenv("RERANKER_MODEL_U")
 
-CSV_DIR = "all_dane/all_data (13).csv"
-DATA_PATH = "data/ustawa_with_paragraph_headers.md"
-PERSIST_PATH = "chroma_ustawa"
-PERSIST_DIR = "chroma_statystyki"
+CSV_DIR = os.getenv("CSV_DIR")
+DATA_PATH = os.getenv("DATA_PATH")
+PERSIST_PATH = os.getenv("PERSIST_PATH")
+PERSIST_DIR = os.getenv("PERSIST_DIR")
 
 # Bielik/Pllum
 try:

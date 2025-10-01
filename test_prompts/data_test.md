@@ -12,8 +12,6 @@
 "Jaką przeciętną liczbę osób otrzymujących emerytury zarejestrowano w Portugalii?",
 "Ile osób ubezpieczonych w KRUS jest jednocześnie objętych ubezpieczeniem społecznym w ZUS z innego tytułu w województwie łódzkim?",
 "Jaką liczbę ubezpieczonych zarejestrowano w Funduszu Składkowym w pierwszym kwartale 2024 roku?"
-"Jaką przeciętną liczbę osób otrzymujących emerytury zarejestrowano w Portugalii?",
-"Jakie było przeciętne świadczenie emerytalne wypłacane przez KRUS w Polsce w pierwszym kwartale 2024 roku?",
 "Jaką przeciętną liczbę osób otrzymujących renty z tytułu niezdolności do pracy odnotowano w Hiszpanii?",
 "Jaką kwotę w złotych stanowiły renty wypadkowe w wypłatach emerytalno-rentowych przekazywanych do państw UE/EFTA i Wielkiej Brytanii razem?",
 "Jakie było przypisane i wpływy należności z tytułu składek na ubezpieczenie społeczne rolników w województwie podkarpackim, z uwzględnieniem składek finansowanych z budżetu państwa na ubezpieczenie emerytalno-rentowe za osoby sprawujące opiekę nad dzieckiem?",

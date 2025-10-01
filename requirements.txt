@@ -6,14 +6,14 @@ huggingface_hub
 accelerate
 safetensors
 bitsandbytes            
-sentence-transformers
+sentence_transformers
 optimum
 onnxruntime
 langchain
-langchain-core
-langchain-community
-langchain-chroma        
-langchain-huggingface   
+langchain_core
+langchain_community
+langchain_chroma        
+langchain_huggingface
 langsmith               
 chromadb
 rank-bm25
@@ -21,3 +21,4 @@ fastapi
 uvicorn
 pydantic
 onnx
+python-dotenv
