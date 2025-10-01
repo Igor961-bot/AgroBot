@@ -3,8 +3,8 @@ Krus chatbot to interaktywny asystent dla rolników oraz instytucji (ustawy + da
 ## Założenia projektu
 * **RAG hybrydowy**: ChromaDB + BM25/CE do rerankingu.
 * **Dwa tryby odpowiedzi**:
-  1. **Ustawa** – odpowiedzi z przypisanymi cytatami/artykułami;
-  2. **Dane** – szybkie zwroty danych tabelarycznych.
+  * **Ustawa** – odpowiedzi z przypisanymi cytatami/artykułami;
+  * **Dane** – szybkie zwroty danych tabelarycznych.
 Przełączanie pomiędzy modułami aktualnie odbywa się w następujący sposób:
 **Dane** należy w zapytaniu użytkownika podać jedno ze słów klucz *dane*, *statystyki*, *statystycznie*, wtedy 
 * **Front + Backend**:
