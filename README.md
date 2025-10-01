@@ -24,7 +24,7 @@ Przełączanie pomiędzy modułami aktualnie odbywa się w następujący sposób
 * `.env.sample` - plik do przetrzymywania zmiennych środowiskowych
 * `requirements.txt` - plik instalacyjny
 ## Uruchamianie aplikacji 
-W terminalu w folderze *Agrobot* należy uruchomić komendę `pip install requirements.txt`. 
+W terminalu w folderze *Agrobot* należy uruchomić komendę `pip install -r requirements.txt`. 
 ### Uruchamiania poprzez CLI
 Należy przejść do pliku 'ask.py' który trzeba wywołać. Po załadowaniu, można w konsoli zadawać pytania. Jeśli wybrany tryb to odpowiedź na temat ustawy, po zadaniu pierwszego pytania należy postępować zgodnie z instrukcją wyświetloną w terminalu aby użyć trybu `follow_up`, który sprawia, że użytkownik może zadać dopytywać w odniesieniu o poprzednie pytanie. 
 ### Uruchamianie frontendu oraz backendu
