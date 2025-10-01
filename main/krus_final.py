@@ -6,7 +6,6 @@ from typing import List, Optional, Dict, Callable
 import numpy as np
 import torch
 from langchain.memory import ConversationBufferWindowMemory
-from langchain_community.llms import HuggingFacePipeline
 from langchain.prompts import PromptTemplate
 from langchain.chains import ConversationalRetrievalChain
 from langchain_core.callbacks import CallbackManager
@@ -14,19 +13,14 @@ from langchain.callbacks.tracers.langchain import LangChainTracer
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.documents import Document  
 
-from resources import db
-from resources import gen_model, tokenizer
-from resources import cross_encoder_ustawa
+from resources import vectorstore_U
+from resources import cross_encoder_U
+from langchain_openai import ChatOpenAI
+import os
 
-from transformers import pipeline
+
 from pydantic import PrivateAttr
-
-login("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")
-
-os.environ["LANGCHAIN_API_KEY"] = "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"
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"] = "KRUS-debug"
-os.environ["TOKENIZERS_PARALLELISM"] = "true"   
+  
 torch.backends.cuda.matmul.allow_tf32 = True  
 
 sorDEBUG = True
@@ -37,12 +31,10 @@ RERANK_THRESHOLD = 0.2
 K_SIM   = 15
 K_FINAL = 5
 
-db = db
+db = vectorstore_U
 model = gen_model
-cross_encoder = cross_encoder_ustawa
+cross_encoder = cross_encoder_U
 
-if globals().get("model", None) is None or globals().get("tokenizer", None) is None:
-    raise RuntimeError("Załaduj wcześniej LLM do zmiennych `model` i `tokenizer`.")
 
 if "db" not in globals():
     raise RuntimeError("Brak globalnej bazy `db` (Chroma). Zainicjalizuj ją przed załadowaniem skryptu.")
@@ -371,24 +363,18 @@ memory = ConversationBufferWindowMemory(
     k=3, memory_key="chat_history", return_messages=True, output_key="answer"
 )
 
-hf_pipe = pipeline(
-    "text-generation",
-    model=model,
-    tokenizer=tokenizer,
-    max_new_tokens=512,
-    do_sample=True,
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "http://127.0.0.1:1234/v1").rstrip("/")
+LMSTUDIO_API_KEY = os.getenv("LMSTUDIO_API_KEY", "lm-studio")
+LLM_MODEL_ID = os.getenv("LLM_MODEL_ID", "bielik-11b-v2.6-instruct")
+
+llm = ChatOpenAI(
+    model=LLM_MODEL_ID,
+    base_url=LLM_BASE_URL,
+    api_key=LMSTUDIO_API_KEY,
     temperature=0.35,
-    top_p=0.95,
-    top_k=50,
-    repetition_penalty=1.0,
-    pad_token_id=(getattr(globals().get("tokenizer"), "eos_token_id", None)),
-    eos_token_id=(getattr(globals().get("tokenizer"), "eos_token_id", None)),
-    return_full_text=False,
-    use_cache=True,
-    batch_size=1,  
-    num_beams=1,
+    max_tokens=512,        # odpowiednik max_new_tokens
 )
-llm = HuggingFacePipeline(pipeline=hf_pipe)
+
 
 prompt_base = PromptTemplate(
     input_variables=["context", "question"],

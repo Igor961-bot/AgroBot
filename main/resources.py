@@ -1,273 +1,188 @@
- #resources
+from __future__ import annotations
+import os
+from typing import Any, Dict, List, Optional, Tuple
 
-# wczytac bielik i w modułach zostawic tylko hf_pipeline
-# wczytac embedder i crossencoder z tabdata
-# stworzyc dwie kolekcje w jednej instacni chormaDB
-# 
-
-from dotenv import load_dotenv
-load_dotenv() 
-
-import os, re, unicodedata
-from typing import List, Dict, Any, Tuple, Optional
-import pandas as pd
-import torch
-
-try:
-    from transformers.utils import logging as hf_logging
-    hf_logging.set_verbosity_error()
-    os.environ["TRANSFORMERS_VERBOSITY"] = "error"
-except Exception:
-    pass
-
-from langchain_core.documents import Document
-from langchain_community.retrievers import BM25Retriever
-
-import os, re, shutil, unicodedata, asyncio
-from typing import List, Optional, Dict, Any, Tuple, Callable
 import numpy as np
 import torch
-from langchain_core.documents import Document  
-import torch
-import os
-from langchain_core.documents import Document
-from typing import List, Optional
-from sentence_transformers import CrossEncoder
-from optimum.onnxruntime import ORTModelForSequenceClassification
-from transformers import AutoTokenizer
-import onnxruntime as ort
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+
+from openai import OpenAI
+
 from langchain_core.embeddings import Embeddings
-from transformers import pipeline as hf_pipeline
-import shutil, re
-from langchain.embeddings import HuggingFaceBgeEmbeddings
-from langchain.vectorstores import Chroma
-from langchain.document_loaders import TextLoader
-from langchain.text_splitter import MarkdownHeaderTextSplitter
-from sentence_transformers import CrossEncoder
-from transformers import pipeline as hf_pipeline
-from langchain_community.vectorstores import Chroma
 try:
-    from langchain_chroma import Chroma
-    _CHROMA_NEW = True
-except ImportError:
-    from langchain_community.vectorstores import Chroma
-    _CHROMA_NEW = False
-from transformers import AutoTokenizer as HF_AutoTokenizer, AutoModelForCausalLM, pipeline
-from transformers import AutoModel, AutoTokenizer, BitsAndBytesConfig
-_HAS_RERANK = True
-try:
-    from langchain_community.cross_encoders import HuggingFaceCrossEncoder
+    from langchain_chroma import Chroma   
 except Exception:
-    _HAS_RERANK = False
+    from langchain_community.vectorstores import Chroma  
+
+from sentence_transformers import CrossEncoder
+from transformers import AutoTokenizer
+from optimum.onnxruntime import ORTModelForSequenceClassification
+
+from dotenv import load_dotenv
+load_dotenv()
+
+USE_LMSTUDIO: bool = os.getenv("USE_LMSTUDIO", "1").lower() in ("1", "true", "yes")
+LLM_BASE_URL: str = os.getenv("LLM_BASE_URL", "http://127.0.0.1:1234/v1").rstrip("/")
+LMSTUDIO_API_KEY: str = os.getenv("LMSTUDIO_API_KEY", "lm-studio")
+LLM_MODEL_ID: str = os.getenv("LLM_MODEL_ID", "bielik-11b-v2.6-instruct")
+
+EMBEDDER_MODEL_T: Optional[str] = os.getenv("EMBEDDER_MODEL_T")
+EMBEDDER_MODEL_U: Optional[str] = os.getenv("EMBEDDER_MODEL_U")
+
+RERANKER_MODEL_T: Optional[str] = os.getenv("RERANKER_MODEL_T")  
+RERANKER_MODEL_U: Optional[str] = os.getenv("RERANKER_MODEL_U")  
+PERSIST_DIR: str = os.getenv("PERSIST_DIR", "./chroma_statystyki")  
+PERSIST_PATH: str = os.getenv("PERSIST_PATH", "./chroma_ustawa")   
 
 
-BASE_MODEL_ID    = os.getenv("BASE_MODEL_ID")
-# "speakleash/Bielik-11B-v2.6-Instruct"
-# "CYFRAGOVPL/PLLuM-12B-chat"
+_client_chat = OpenAI(base_url=LLM_BASE_URL, api_key=LMSTUDIO_API_KEY)
 
-# tabele
-RERANKER_MODEL_T = os.getenv("RERANKER_MODEL_T")
-EMBEDDER_MODEL_T = os.getenv("EMBEDDER_MODEL_T")
+class LMStudioPipeline:
+    def __init__(self, system: Optional[str] = None, temperature: float = 0.2, max_new_tokens: int = 1024):
+        self.system = system
+        self.temperature = float(temperature)
+        self.max_new_tokens = int(max_new_tokens)
 
-# ustawa
-EMBEDDER_MODEL_U   = os.getenv("EMBEDDER_MODEL_U")
-RERANKER_MODEL_U   = os.getenv("RERANKER_MODEL_U")
+    def __call__(self, inputs: str | List[str], **kwargs) -> Dict[str, Any] | List[Dict[str, Any]]:
+        if isinstance(inputs, list):
+            return [self._one(x, **kwargs) for x in inputs]
+        return self._one(inputs, **kwargs)
 
-CSV_DIR = os.getenv("CSV_DIR")
-DATA_PATH = os.getenv("DATA_PATH")
-PERSIST_PATH = os.getenv("PERSIST_PATH")
-PERSIST_DIR = os.getenv("PERSIST_DIR")
+    def _one(self, prompt: str, **kwargs) -> Dict[str, Any]:
+        temp = float(kwargs.get("temperature", self.temperature))
+        max_tokens = int(kwargs.get("max_new_tokens", kwargs.get("max_tokens", self.max_new_tokens)))
+        msgs = []
+        if self.system:
+            msgs.append({"role": "system", "content": self.system})
+        msgs.append({"role": "user", "content": prompt})
+        resp = _client_chat.chat.completions.create(
+            model=LLM_MODEL_ID, messages=msgs, temperature=temp, max_tokens=max_tokens, stream=False
+        )
+        return {"generated_text": resp.choices[0].message.content}
 
-# Bielik/Pllum
-try:
-    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_ID, use_fast=True, trust_remote_code=False)
-except Exception as e:
-    print("Fast tokenizer fail → slow:", e)
-    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_ID, use_fast=False)
+def hf_pipeline(task: str = "text-generation", **kwargs) -> LMStudioPipeline:
+    assert task in ("text-generation", "text2text-generation", "conversational")
+    return LMStudioPipeline(
+        system=kwargs.get("system_prompt"),
+        temperature=kwargs.get("temperature", 0.2),
+        max_new_tokens=kwargs.get("max_new_tokens", 1024),
+    )
 
-bnb = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_use_double_quant=True,
-    bnb_4bit_compute_dtype=torch.bfloat16 
-)
+gen_model = hf_pipeline("text-generation")
+tokenizer = None  
 
+def llm_generate(prompt: str, **kw) -> str:
+    res = gen_model(prompt, **kw)
+    if isinstance(res, list):
+        res = res[0]
+    return res["generated_text"]
 
-gen_model = AutoModelForCausalLM.from_pretrained(
-    BASE_MODEL_ID,
-    quantization_config=bnb,
-    torch_dtype=torch.bfloat16,      
-    device_map="cuda:0",               
-    low_cpu_mem_usage=False,
-    attn_implementation="sdpa",      
-    trust_remote_code=True,
-).eval()
+_client_embed = OpenAI(base_url=LLM_BASE_URL, api_key=LMSTUDIO_API_KEY)
 
-#----------------------------------------- resources tabelaryczne -----------------------------------------
-#EMB TABELI
+class LMStudioEmbeddings(Embeddings):
+    def __init__(self, model: str, batch_size: int = 64):
+        self.model = model
+        self.batch_size = batch_size
 
-device = "cpu"
+    def _is_e5(self) -> bool:
+        name = (self.model or "").lower()
+        return "e5" in name  
 
-class MXBAIEmbeddings(Embeddings):
-    def __init__(self, model_id: str = EMBEDDER_MODEL_T, device: Optional[str] = None):
-        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.tok = AutoTokenizer.from_pretrained(model_id)
-        self.net = AutoModel.from_pretrained(
-            model_id,
-            torch_dtype=torch.bfloat16 if self.device=="cuda" else torch.float32
-        ).to(self.device)
-        self.net.eval()
+    def _prefix(self, texts: List[str], is_query: bool) -> List[str]:
+        if not self._is_e5():
+            return texts
+        p = "query: " if is_query else "passage: "
+        return [p + t for t in texts]
 
-    @torch.inference_mode()
-    def _encode(self, texts: List[str], is_query=False, batch_size=32) -> List[List[float]]:
-        prefix = "query: " if is_query else "passage: "
-        out = []
-        for i in range(0, len(texts), batch_size):
-            batch = [prefix + t for t in texts[i:i+batch_size]]
-            enc = self.tok(batch, padding=True, truncation=True, return_tensors="pt").to(self.device)
-            last = self.net(**enc).last_hidden_state
-            attn = enc["attention_mask"].unsqueeze(-1)
-            emb = (last * attn).sum(dim=1) / torch.clamp(attn.sum(dim=1), min=1)
-            emb = torch.nn.functional.normalize(emb, p=2, dim=1)
-            out.extend(emb.detach().cpu().tolist())
-        return out
+    def _embed_batch(self, texts: List[str]) -> List[List[float]]:
+        resp = _client_embed.embeddings.create(model=self.model, input=texts)
+        return [d.embedding for d in resp.data]
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        return self._encode(texts, is_query=False)
+        texts = self._prefix(texts, is_query=False)
+        out: List[List[float]] = []
+        for i in range(0, len(texts), self.batch_size):
+            out.extend(self._embed_batch(texts[i:i+self.batch_size]))
+        return out
 
     def embed_query(self, text: str) -> List[float]:
-        return self._encode([text], is_query=True)[0]
+        text = self._prefix([text], is_query=True)[0]
+        return self._embed_batch([text])[0]
 
-emb = MXBAIEmbeddings()
+def build_embeddings(model_name: Optional[str]) -> Embeddings:
+    if not model_name:
+        raise ValueError("Brak nazwy modelu embeddings w ENV.")
+    if USE_LMSTUDIO:
+        try:
+            _client_embed.embeddings.create(model=model_name, input=["ping"])
+            return LMStudioEmbeddings(model_name)
+        except Exception as e:
+            print(f"[EMB] LM Studio '{model_name}' niedostępne → fallback lokalny: {e}")
+    try:
+        from sentence_transformers import SentenceTransformer
+        class ST_Emb(Embeddings):
+            def __init__(self, name: str):
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+                self.model = SentenceTransformer(name, device=device)
+            def embed_documents(self, texts: List[str]) -> List[List[float]]:
+                v = self.model.encode(texts, normalize_embeddings=True, convert_to_numpy=True, batch_size=64)
+                return v.astype(np.float32).tolist()
+            def embed_query(self, text: str) -> List[float]:
+                v = self.model.encode([text], normalize_embeddings=True, convert_to_numpy=True)
+                return v[0].astype(np.float32).tolist()
+        return ST_Emb(model_name)
+    except Exception:
+        from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+        return HuggingFaceBgeEmbeddings(
+            model_name=model_name,
+            model_kwargs={'device': 'cuda' if torch.cuda.is_available() else 'cpu'},
+            encode_kwargs={'normalize_embeddings': True},
+        )
 
-persist_dir = PERSIST_DIR
-shutil.rmtree(persist_dir, ignore_errors=True)
-os.makedirs(persist_dir, exist_ok=True)
-
-vectorstore = Chroma(
-    collection_name="statystyki",
-    embedding_function=emb,
-    persist_directory=PERSIST_DIR
-)
-
-#CE TABELE
-CE_MODEL_ID = RERANKER_MODEL_T
-
-reranker_ce = None
-try:
-    reranker_ce = CrossEncoder(CE_MODEL_ID, device=emb.device)
-except Exception:
-    reranker_ce = None
-
-
-#----------------------------------------- resources ustawowe -----------------------------------------
+emb_T = build_embeddings(EMBEDDER_MODEL_T)
+emb_U = build_embeddings(EMBEDDER_MODEL_U)
 
 class OptimizedONNXCrossEncoder:
-    def __init__(self, model_name, device="cpu"):
+    def __init__(self, model_name: str, device: str = "cpu"):
         self.device = device
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        
-        providers = ["CPUExecutionProvider"]
-        
+        self.model = None
+        self.fallback_model = None
         try:
+            self.tok = AutoTokenizer.from_pretrained(model_name)
             self.model = ORTModelForSequenceClassification.from_pretrained(
-                model_name,
-                provider=providers[0],
-                export=True
+                model_name, provider="CPUExecutionProvider", export=True
             )
-            print("ONNX Cross Encoder załadowany na CPU!")
+            print(f"[CE] ONNX OK: {model_name}")
         except Exception as e:
-            print(f"Fallback do zwykłego CrossEncoder na CPU: {e}")
-            from sentence_transformers import CrossEncoder
-            self.fallback_model = CrossEncoder(model_name, device="cpu")
-            self.model = None
-    
-    def predict(self, pairs, batch_size=32, **kwargs):
+            print(f"[CE] Fallback ST dla {model_name}: {e}")
+            self.fallback_model = CrossEncoder(model_name, device="cuda" if torch.cuda.is_available() else "cpu")
+
+    def predict(self, pairs: List[Tuple[str, str]], batch_size: int = 64) -> np.ndarray:
         if self.model is None:
-            return self.fallback_model.predict(pairs, batch_size=batch_size)
-        
-        all_scores = []
+            return np.array(self.fallback_model.predict(pairs, batch_size=batch_size))
+        import torch as _torch
+        scores: List[float] = []
         for i in range(0, len(pairs), batch_size):
-            batch = pairs[i:i+batch_size]
-            texts_1 = [p[0] for p in batch]
-            texts_2 = [p[1] for p in batch]
-            
-            inputs = self.tokenizer(
-                texts_1, texts_2,
-                padding=True,
-                truncation=True,
-                max_length=512,
-                return_tensors="pt"
-            )
-            
-            with torch.no_grad():
-                outputs = self.model(**inputs)
-                if outputs.logits.shape[-1] == 2:
-                    scores = torch.softmax(outputs.logits, dim=-1)[:, 1]
+            b = pairs[i:i+batch_size]
+            t1 = [p[0] for p in b]; t2 = [p[1] for p in b]
+            enc = self.tok(t1, t2, padding=True, truncation=True, max_length=512, return_tensors="pt")
+            with _torch.no_grad():
+                logits = self.model(**{k: v for k, v in enc.items()}).logits
+                if logits.shape[-1] == 2:
+                    s = _torch.softmax(logits, dim=-1)[:, 1]
                 else:
-                    scores = outputs.logits[:, 0]
-                scores = scores.cpu().numpy()
-                all_scores.extend(scores.tolist())
-        
-        return np.array(all_scores)
+                    s = logits[:, 0]
+            scores.extend(s.cpu().numpy().tolist())
+        return np.array(scores, dtype=np.float32)
 
-#CE USTAWA
-cross_encoder_ustawa = OptimizedONNXCrossEncoder(RERANKER_MODEL_U, device=device)
-from sentence_transformers import CrossEncoder
+cross_encoder_T = OptimizedONNXCrossEncoder(RERANKER_MODEL_T or "BAAI/bge-reranker-v2-m3")
+cross_encoder_U = OptimizedONNXCrossEncoder(RERANKER_MODEL_U or "cross-encoder/ms-marco-MiniLM-L-6-v2")
 
-# EMB USTAWA
-embedder_u = HuggingFaceBgeEmbeddings(
-    model_name=EMBEDDER_MODEL_U,
-    model_kwargs={'device': 'cuda' if torch.cuda.is_available() else 'cpu'},
-    encode_kwargs={'normalize_embeddings': True}
-)
+vectorstore_T = Chroma(collection_name="statystyki", embedding_function=emb_T, persist_directory=PERSIST_DIR)
+vectorstore_U = Chroma(collection_name="ustawa",     embedding_function=emb_U, persist_directory=PERSIST_PATH)
 
-# chromaDB dla ustawy
-persist_path = PERSIST_PATH
-
-shutil.rmtree(persist_path, ignore_errors=True)
-os.makedirs(persist_path, exist_ok=True)
-
-docs_raw = TextLoader(DATA_PATH, encoding="utf-8").load()
-header_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=[("###", "ustep")])
-chunks = header_splitter.split_text(docs_raw[0].page_content)
-
-# meta: <!-- chapter:1 article:16a paragraph:3 id:ch1-art16a-ust3 -->
-meta_re = re.compile(
-    r"<!--\s*chapter\s*:\s*(\d+)\s+article\s*:\s*([0-9a-z]+)\s+paragraph\s*:\s*([0-9a-z]+)\s+id\s*:\s*([^\s>]+)\s*-->",
-    re.I
-)
-
-normed: List[Document] = []
-for d in chunks:
-    md = dict(d.metadata)
-    header_text = md.get("ustep", "") or ""
-    source_for_meta = header_text + "\n" + d.page_content
-    m = meta_re.search(source_for_meta)
-    if m:
-        md["chapter"]   = int(m.group(1))
-        md["article"]   = m.group(2).lower()
-        md["paragraph"] = m.group(3).lower()
-        md["id"]        = m.group(4)
-        md["rozdzial"]  = md["chapter"]
-        md["artykul"]   = md["article"]
-        md["ust"]       = md["paragraph"]
-
-    clean_header = meta_re.sub("", header_text).strip()
-    if clean_header:
-        md["ustep"] = clean_header
-
-    content = meta_re.sub("", d.page_content).strip()
-    normed.append(Document(page_content=content, metadata=md))
-
-print(f"[CHROMA] Liczba ustępów: {len(normed)}")
-
-db = Chroma.from_documents(
-    documents=normed,
-    embedding=embedder_u,
-    persist_directory=persist_path,
-    collection_metadata={"hnsw:space": "cosine"}
-)
-
+__all__ = [
+    "gen_model", "hf_pipeline", "llm_generate", "tokenizer",
+    "emb_T", "emb_U", "vectorstore_T", "vectorstore_U",
+    "cross_encoder_T", "cross_encoder_U",
+    "PERSIST_DIR", "PERSIST_PATH",
+]
