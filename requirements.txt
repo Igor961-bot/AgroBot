@@ -23,3 +23,4 @@ pydantic
 onnx
 python-dotenv
 openai
+langchain-openai

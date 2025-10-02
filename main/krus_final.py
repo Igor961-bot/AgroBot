@@ -1,28 +1,29 @@
-
-import os
-from huggingface_hub import login
+# -*- coding: utf-8 -*-
 import os, re, unicodedata, asyncio
 from typing import List, Optional, Dict, Callable
+
 import numpy as np
 import torch
+
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.prompts import PromptTemplate
 from langchain.chains import ConversationalRetrievalChain
 from langchain_core.callbacks import CallbackManager
 from langchain.callbacks.tracers.langchain import LangChainTracer
 from langchain_core.retrievers import BaseRetriever
-from langchain_core.documents import Document  
+from langchain_core.documents import Document
+from pydantic import PrivateAttr
 
+# === zasoby (Twoje runtime'owe) ===
 from resources import vectorstore_U
 from resources import cross_encoder_U
+
+# === LM Studio (OpenAI-compatible) ===
 from langchain_openai import ChatOpenAI
-import os
 
+torch.backends.cuda.matmul.allow_tf32 = True
 
-from pydantic import PrivateAttr
-  
-torch.backends.cuda.matmul.allow_tf32 = True  
-
+# ----------------- KONFIG -----------------
 sorDEBUG = True
 DEBUG = sorDEBUG
 RETURN_STRING_WHEN_DEBUG_FALSE = True
@@ -31,16 +32,14 @@ RERANK_THRESHOLD = 0.2
 K_SIM   = 15
 K_FINAL = 5
 
+# Chroma i CE
 db = vectorstore_U
-model = gen_model
 cross_encoder = cross_encoder_U
-
 
 if "db" not in globals():
     raise RuntimeError("Brak globalnej bazy `db` (Chroma). Zainicjalizuj ją przed załadowaniem skryptu.")
 
-#------------------------------------------------ funkcje pomocnicze ------------------------------------------------
-
+# ----------------- UTILS -----------------
 def strip_accents_lower(s: str) -> str:
     if not s:
         return ""
@@ -49,10 +48,10 @@ def strip_accents_lower(s: str) -> str:
     return s.lower().strip()
 
 ROLE_CUT_RE = re.compile(
-    r"(?i)"                              
-    r"(###\s*(?:user|asystent|dokumenty|system)?\s*:?" 
-    r"|(?:^|\s)(?:user|asystent|dokumenty|system)\s*:" 
-    r"|<\s*(?:user|assistant|docs?|system)\s*>)"      
+    r"(?i)"
+    r"(###\s*(?:user|asystent|dokumenty|system)?\s*:?"
+    r"|(?:^|\s)(?:user|asystent|dokumenty|system)\s*:"
+    r"|<\s*(?:user|assistant|docs?|system)\s*>)"
 )
 
 def cut_after_role_markers(s: str) -> str:
@@ -79,7 +78,6 @@ def parse_ref_ext(query: str) -> Optional[Dict[str, str]]:
     if m.group("pkt"): ref["punkt"]     = m.group("pkt").lower()
     if m.group("lit"): ref["litera"]    = m.group("lit").lower()
     return ref if ref else None
-
 
 def _build_citations_block(docs: List[Document]) -> str:
     if not docs:
@@ -115,7 +113,6 @@ def log_rerank_scores(docs: List[Document], header: str = "DEBUG rerank scores")
         pid = md.get("id") or f"ch{md.get('chapter')}-art{md.get('article')}-ust{md.get('paragraph')}"
         sc  = md.get("rerank_score")
         print(f"- {pid}: score={sc:.6f}" if isinstance(sc, (int, float)) else f"- {pid}: score=(brak)")
-
 
 def strip_markdown_bold(text: str) -> str:
     if not text:
@@ -204,11 +201,9 @@ def trim_incomplete_sentences(text: str) -> str:
 def _finalize_return(text: str, docs: List[Document], mode: str):
     hint = "\n\n(Jeśli chcesz dopytać, kliknij „Chciałbym dopytać”, a dodam kolejny ustęp do kontekstu.)"
     text_out = text + hint
-
     debug = [{"id": (d.metadata or {}).get("id"),
               "score": (d.metadata or {}).get("rerank_score")} for d in (docs or [])]
-    payload = {"answer": text_out, "source_documents": docs, "debug": {"mode": mode, "rerank": debug}}
-    return payload
+    return {"answer": text_out, "source_documents": docs, "debug": {"mode": mode, "rerank": debug}}
 
 _SMALLTALK_RULES = [
     (r"^(czesc|cze|hej|heja|hejka|witam|siema|elo|halo|dzien dobry|dobry wieczor)\b",
@@ -257,7 +252,7 @@ def route_query(query: str):
         return "EXPLICIT_REF", {"ref": ref}
     return "GENERAL", {"query": query}
 
-#------------------------------------------------ funkcje główne ------------------------------------------------
+# ----------------- RETRIEVE + RERANK -----------------
 def retrieve_basic(query: str,
                    k_sim: int = K_SIM,
                    k_final: int = K_FINAL,
@@ -270,24 +265,20 @@ def retrieve_basic(query: str,
 
     def _ce_to_prob(arr: _np.ndarray) -> _np.ndarray:
         arr = _np.asarray(arr, dtype=float)
-        # 1D: jeśli już w [0,1] → zostaw; w innym razie potraktuj jako logit i zrób sigmoid
         if arr.ndim == 1:
             if _np.nanmin(arr) >= 0.0 and _np.nanmax(arr) <= 1.0:
                 return arr
             return 1.0 / (1.0 + _np.exp(-arr))
-        # 2D: klasy (neg,pos) → softmax i bierzemy prawdopodobieństwo ostatniej klasy
         if arr.ndim == 2 and arr.shape[1] >= 2:
             x = arr - arr.max(axis=1, keepdims=True)
             ex = _np.exp(x)
             sm = ex / _np.clip(ex.sum(axis=1, keepdims=True), 1e-9, None)
             return sm[:, -1]
-        # awaryjnie: min-max w batchu
         mn, mx = float(_np.nanmin(arr)), float(_np.nanmax(arr))
         if mx - mn < 1e-9:
             return _np.zeros_like(arr, dtype=float)
         return (arr - mn) / (mx - mn)
 
-    # --- routing / filtr po referencji (jeśli parser coś znalazł) ---
     ref = parse_ref_ext(query)
     filter_dict: dict | None = None
     if ref:
@@ -298,7 +289,6 @@ def retrieve_basic(query: str,
     if DEBUG:
         print(f"[RET] query={query!r} filter={filter_dict}")
 
-    # --- similarity ---
     docs = db.similarity_search(query, k=k_sim, filter=filter_dict)
     if DEBUG:
         print(f"[RET] similarity → {len(docs)} docs")
@@ -307,12 +297,11 @@ def retrieve_basic(query: str,
     if not docs:
         return []
 
-    # --- deduplikacja po PID (często te same ustępy wracają 2×) ---
     uniq: list[Document] = []
     seen: set[str] = set()
     for d in docs:
         pid = _doc_pid(d.metadata or {})
-        if pid in seen: 
+        if pid in seen:
             continue
         seen.add(pid)
         uniq.append(d)
@@ -320,7 +309,6 @@ def retrieve_basic(query: str,
     if DEBUG:
         print(f"[RET] after dedupe → {len(docs)} docs")
 
-    # --- CE scoring ---
     pairs = [(query, d.page_content) for d in docs]
     raw_scores = cross_encoder.predict(pairs, batch_size=32)
     raw_scores = _np.asarray(raw_scores, dtype=float)
@@ -333,7 +321,6 @@ def retrieve_basic(query: str,
             pass
         print(f"[RET][CE] prob: min={_np.nanmin(probs):.4f} max={_np.nanmax(probs):.4f} mean={_np.nanmean(probs):.4f}")
 
-    # --- próg na PROB + sort ---
     scored_docs = [(d, float(p)) for d, p in zip(docs, probs)]
     if rerank_threshold is not None:
         before = len(scored_docs)
@@ -346,12 +333,11 @@ def retrieve_basic(query: str,
     scored_docs.sort(key=lambda x: x[1], reverse=True)
     scored_docs = scored_docs[:k_final]
 
-    # --- dopnij wynik do metadanych i zwróć ---
     out: List[Document] = []
     for d, s in scored_docs:
         md = dict(d.metadata or {})
         md["rerank_prob"] = float(s)
-        md["rerank_score"] = float(s)   # używamy prob jako score
+        md["rerank_score"] = float(s)
         d.metadata = md
         out.append(d)
 
@@ -359,6 +345,7 @@ def retrieve_basic(query: str,
         print("[RET] final:", [(_doc_pid(d.metadata or {}), f"{(d.metadata or {}).get('rerank_score'):.3f}") for d in out])
     return out
 
+# ----------------- MEMORY + LLM -----------------
 memory = ConversationBufferWindowMemory(
     k=3, memory_key="chat_history", return_messages=True, output_key="answer"
 )
@@ -372,9 +359,8 @@ llm = ChatOpenAI(
     base_url=LLM_BASE_URL,
     api_key=LMSTUDIO_API_KEY,
     temperature=0.35,
-    max_tokens=512,        # odpowiednik max_new_tokens
+    max_tokens=512,
 )
-
 
 prompt_base = PromptTemplate(
     input_variables=["context", "question"],
@@ -442,7 +428,7 @@ class ConversationState:
         self.last_article_num: Optional[str] = None
         self.last_paragraph_num: Optional[str] = None
         self.last_docs: List[Document] = []
-        self.accum_docs: List[Document] = []   
+        self.accum_docs: List[Document] = []
         self.last_query: Optional[str] = None
 
 STATE = ConversationState()
@@ -462,7 +448,8 @@ def reset_context() -> None:
 def _llm_generate(prompt_tmpl: PromptTemplate, **kwargs) -> str:
     text = prompt_tmpl.format(**kwargs)
     out = llm.invoke(text)
-    return (out or "").strip()
+    # ChatOpenAI zwraca BaseMessage; wyciągnij treść:
+    return getattr(out, "content", out) or ""
 
 def answer_from_docs(question: str, docs: List[Document], *, followup: bool):
     ctx = format_docs_for_prompt(docs) if docs else "(brak dokumentów)"
@@ -472,13 +459,11 @@ def answer_from_docs(question: str, docs: List[Document], *, followup: bool):
     final_text = f"{_build_citations_block(docs)}\nOdpowiedź:\n{answer}"
     return _finalize_return(final_text, docs, mode=("follow_up" if followup else "new_query"))
 
-
-#main function
+# ----------------- MAIN -----------------
 def ask(q: str, reset_memory: bool=False):
     """
-    Naprawa: nie obcinaj źródeł do jednego dokumentu.
-    - New query => STATE.accum_docs = wszystkie docs z retrievera.
-    - Follow-up => dobieramy 1 nowy doc (jak było), ale cytujemy całą akumulację.
+    New query => STATE.accum_docs = wszystkie docs z retrievera.
+    Follow-up => dobieramy 1 nowy doc, cytujemy skumulowane.
     """
     if reset_memory:
         try:
@@ -513,7 +498,6 @@ def ask(q: str, reset_memory: bool=False):
     if _FOLLOW_UP_NEXT:
         _FOLLOW_UP_NEXT = False
 
-        # dobieramy 1 nowy dokument (jak wcześniej), ale nie kasujemy poprzednich
         docs_narrow: List[Document] = []
         if STATE.last_article_num:
             flt = {"article": STATE.last_article_num}
@@ -541,16 +525,11 @@ def ask(q: str, reset_memory: bool=False):
         if STATE.accum_docs:
             _update_state_from_docs([STATE.accum_docs[0]], q)
 
-        # KLUCZOWE: przekazujemy pełną akumulację, więc „Cytowane ustępy” pokaże wszystkie
         return answer_from_docs(q, STATE.accum_docs, followup=True)
 
-    # --- NEW QUERY ---
+    # NEW QUERY
     res = qa_chain.invoke({"question": q})
     docs = res.get("source_documents", []) or []
     _update_state_from_docs(docs, q)
-
-    # KLUCZOWE: NIE obcinamy do [docs[0]]
     STATE.accum_docs = docs[:] if docs else []
-
-    # Pokaż całą listę w cytowaniach i w kontekście LLM
     return answer_from_docs(q, STATE.accum_docs if STATE.accum_docs else docs, followup=False)

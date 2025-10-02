@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 import os
 import re
@@ -6,78 +7,32 @@ import shutil
 from typing import List, Dict, Optional
 
 import numpy as np
+from dotenv import load_dotenv
+load_dotenv()
 
-from langchain_core.documents import Document
+# Chroma
 try:
     from langchain_chroma import Chroma
 except Exception:
     from langchain_community.vectorstores import Chroma
 
+# Dokumenty
+from langchain_core.documents import Document
 from langchain.document_loaders import TextLoader
 from langchain.text_splitter import MarkdownHeaderTextSplitter
 
-from openai import OpenAI
-from langchain_core.embeddings import Embeddings
-
-from dotenv import load_dotenv
-load_dotenv()
-
-
-USE_LMSTUDIO: bool = os.getenv("USE_LMSTUDIO", "1") == "1"
-LLM_BASE_URL: str = os.getenv("LLM_BASE_URL", "http://127.0.0.1:1234/v1").rstrip("/")
-LMSTUDIO_API_KEY: str = os.getenv("LMSTUDIO_API_KEY", "lm-studio")
+from resources import build_embeddings 
 
 EMBEDDER_MODEL_T: Optional[str] = os.getenv("EMBEDDER_MODEL_T")
 EMBEDDER_MODEL_U: Optional[str] = os.getenv("EMBEDDER_MODEL_U")
 
-PERSIST_DIR: str = os.getenv("PERSIST_DIR", "./chroma_statystyki")
+PERSIST_DIR:  str = os.getenv("PERSIST_DIR",  "./chroma_statystyki")
 PERSIST_PATH: str = os.getenv("PERSIST_PATH", "./chroma_ustawa")
 
 DATA_PATH: str = os.getenv("DATA_PATH", "./data/ustawa_with_paragraph_headers.md")
-CSV_DIR: str = os.getenv("CSV_DIR", "./data/tables/all_data.csv")
+CSV_DIR:  str = os.getenv("CSV_DIR",  "./data/tables/all_data.csv")
 
 CHROMA_WIPE_ON_START: bool = os.getenv("CHROMA_WIPE_ON_START", "false").lower() in ("1", "true", "yes")
-
-_client_embed = OpenAI(base_url=LLM_BASE_URL, api_key=LMSTUDIO_API_KEY)
-
-class LMStudioEmbeddings(Embeddings):
-    def __init__(self, model: str, batch_size: int = 64):
-        self.model = model
-        self.batch_size = batch_size
-    def _embed_batch(self, texts: List[str]) -> List[List[float]]:
-        resp = _client_embed.embeddings.create(model=self.model, input=texts)
-        return [d.embedding for d in resp.data]
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        out: List[List[float]] = []
-        for i in range(0, len(texts), self.batch_size):
-            out.extend(self._embed_batch(texts[i:i+self.batch_size]))
-        return out
-    def embed_query(self, text: str) -> List[float]:
-        return self._embed_batch([text])[0]
-
-def build_embeddings(model_name: Optional[str]) -> Embeddings:
-    if not model_name:
-        raise ValueError("Brak nazwy modelu embeddings w ENV.")
-    if USE_LMSTUDIO:
-        try:
-            _client_embed.embeddings.create(model=model_name, input=["ping"])
-            return LMStudioEmbeddings(model_name)
-        except Exception as e:
-            print(f"[EMB] LM Studio niedostępne dla '{model_name}' → przerwij lub zmień ENV. Szczegóły: {e}")
-            raise
-    from sentence_transformers import SentenceTransformer
-    class ST_Emb(Embeddings):
-        def __init__(self, name: str):
-            import torch
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            self.model = SentenceTransformer(name, device=device)
-        def embed_documents(self, texts: List[str]) -> List[List[float]]:
-            v = self.model.encode(texts, normalize_embeddings=True, convert_to_numpy=True, batch_size=64)
-            return v.astype(np.float32).tolist()
-        def embed_query(self, text: str) -> List[float]:
-            v = self.model.encode([text], normalize_embeddings=True, convert_to_numpy=True)
-            return v[0].astype(np.float32).tolist()
-    return ST_Emb(model_name)
 
 def ensure_clean_dir(path: str, wipe: bool) -> None:
     if wipe:
@@ -116,12 +71,11 @@ def parse_md_ustawa(md_path: str) -> List[Document]:
     return docs
 
 def csv_row_to_text(row: Dict[str, str]) -> str:
-    parts = [f"{k}: {v}" for k, v in row.items()]
-    return "\n".join(parts)
+    return "\n".join(f"{k}: {v}" for k, v in row.items())
 
 def build_ustawa(emb_model: str, persist_path: str, data_md: str, wipe: bool) -> int:
     ensure_clean_dir(persist_path, wipe)
-    emb = build_embeddings(emb_model)
+    emb = build_embeddings(emb_model)   
     if not os.path.isfile(data_md):
         print(f"[USTAWA] Brak pliku: {data_md}")
         return 0
@@ -139,24 +93,42 @@ def build_ustawa(emb_model: str, persist_path: str, data_md: str, wipe: bool) ->
     print(f"[USTAWA] Zaindeksowano: {len(docs)}")
     return len(docs)
 
-def build_statystyki_from_csv(emb_model: str, persist_dir: str, csv_path: str, wipe: bool) -> int:
+from data_schema import row_to_document  # NEW
+
+def build_statystyki_from_csv(emb_model: str, persist_dir: str, csv_path_or_dir: str, wipe: bool) -> int:
     ensure_clean_dir(persist_dir, wipe)
     emb = build_embeddings(emb_model)
-    if not os.path.isfile(csv_path):
-        print(f"[STATYSTYKI] Brak CSV: {csv_path} — pomijam budowę.")
+
+    # zbierz pliki CSV
+    csv_files = []
+    if os.path.isdir(csv_path_or_dir):
+        for fn in os.listdir(csv_path_or_dir):
+            if fn.lower().endswith(".csv"):
+                csv_files.append(os.path.join(csv_path_or_dir, fn))
+    elif os.path.isfile(csv_path_or_dir) and csv_path_or_dir.lower().endswith(".csv"):
+        csv_files.append(csv_path_or_dir)
+
+    if not csv_files:
+        print(f"[STATYSTYKI] Brak CSV w: {csv_path_or_dir} — tworzę pustą kolekcję.")
         Chroma(collection_name="statystyki", embedding_function=emb, persist_directory=persist_dir)
         return 0
+
     docs: List[Document] = []
-    with open(csv_path, newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for i, row in enumerate(reader):
-            content = csv_row_to_text(row)
-            md = {"row_index": i, "source": os.path.basename(csv_path)}
-            docs.append(Document(page_content=content, metadata=md))
+    for csv_path in csv_files:
+        with open(csv_path, newline="", encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f)
+            required = {"dataset","measure","value","region","period","typ"}
+            if not required.issubset(set(reader.fieldnames or [])):
+                print(f"[UWAGA] Pomijam '{csv_path}' — brakuje kolumn: {required - set(reader.fieldnames or [])}")
+                continue
+            for i, row in enumerate(reader):
+                docs.append(row_to_document(row, source_file=csv_path, row_index=i))
+
     if not docs:
-        print("[STATYSTYKI] CSV puste — kolekcja pozostanie pusta.")
+        print("[STATYSTYKI] Nie zbudowano żadnego dokumentu.")
         Chroma(collection_name="statystyki", embedding_function=emb, persist_directory=persist_dir)
         return 0
+
     Chroma.from_documents(
         documents=docs,
         embedding=emb,
@@ -164,17 +136,17 @@ def build_statystyki_from_csv(emb_model: str, persist_dir: str, csv_path: str, w
         collection_name="statystyki",
         collection_metadata={"hnsw:space": "cosine"},
     )
-    print(f"[STATYSTYKI] Zaindeksowano wierszy: {len(docs)}")
+    print(f"[STATYSTYKI] Zaindeksowano wierszy: {len(docs)} (pełne metadata)")
     return len(docs)
 
+
+# ---------- MAIN ----------
 def main() -> None:
     print("[BUILD] Start budowania kolekcji Chroma…")
-    # USTAWA
     try:
         build_ustawa(EMBEDDER_MODEL_U, PERSIST_PATH, DATA_PATH, CHROMA_WIPE_ON_START)
     except Exception as e:
         print(f"[BUILD][USTAWA] Błąd: {e}")
-    # STATYSTYKI
     try:
         build_statystyki_from_csv(EMBEDDER_MODEL_T, PERSIST_DIR, CSV_DIR, CHROMA_WIPE_ON_START)
     except Exception as e:
