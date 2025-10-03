@@ -1,0 +1,374 @@
+Ty: dane ile wynosi przeciętna liczba świadczeń emerytalnych?
+2025-10-03 13:38:17,870 [DEBUG] Q | q=dane ile wynosi przeciętna liczba świadczeń emerytalnych?
+2025-10-03 13:38:17,928 [DEBUG] [TIMER] parse_query_fields | ms=57
+2025-10-03 13:38:17,928 [DEBUG] PARSED
+2025-10-03 13:38:17,928 [DEBUG] PREFS | prefer_typ=emerytury force_typ=True force_national=True is_country_query=False
+2025-10-03 13:38:17,989 [DEBUG] MQ_base | n=3 examples=['dane podaj wartość przecietna liczba swiadczen emerytalnych?', 'dane ile wynosi przecietna liczba swiadczen emerytalnych?', 'dane ile wynosi przeciętna liczba świadczeń emerytalnych? ogółem']
+2025-10-03 13:38:19,650 [DEBUG] [TIMER] MQ_llm | ms=1660
+2025-10-03 13:38:19,651 [DEBUG] MQ_final | n=10 examples=['dane podaj wartość przecietna liczba swiadczen emerytalnych?', 'dane ile wynosi przecietna liczba swiadczen emerytalnych?', 'dane ile wynosi przeciętna liczba świadczeń emerytalnych? ogółem', 'ile wynosi przeciętna liczba świadczeń emerytalnych wypłacanych przez KRUS?', 'jaka jest średnia roczna 
+liczba świadczeń emerytalnych KRUS?']
+2025-10-03 13:38:19,652 [DEBUG] [TIMER] MQ_total | ms=1722
+2025-10-03 13:38:21,273 [DEBUG] dense_search_on | inputs=10 per_k=60 raw=600 uniq=139
+2025-10-03 13:38:21,273 [DEBUG] [TIMER] dense_search_on | ms=1621
+2025-10-03 13:38:22,086 [DEBUG] [TIMER] HyDE_llm | ms=720
+2025-10-03 13:38:22,087 [DEBUG] HyDE_final | n=4 sample=['dataset: - | measure: - | value: <X> | region: ogółem | period: - | typ: -', '<X>Przeciętna liczba świadczeń emerytalnych w ogólnym ujęciu systematycznie rośnie.', '<X>Wartość ta jest zależna od demograficznych trendów i polityki społecznej państwa.']
+2025-10-03 13:38:22,087 [DEBUG] [TIMER] HyDE_total | ms=812
+2025-10-03 13:38:22,649 [DEBUG] dense_search_on | inputs=4 per_k=60 raw=240 uniq=223
+2025-10-03 13:38:22,649 [DEBUG] [TIMER] dense_search_on | ms=561
+2025-10-03 13:38:22,801 [DEBUG] dense_search | k=100 got=100
+2025-10-03 13:38:22,801 [DEBUG] [TIMER] dense_search | ms=151
+2025-10-03 13:38:22,811 [DEBUG] [TIMER] bm25_invoke | ms=9
+2025-10-03 13:38:22,812 [DEBUG] BM25 | got=100
+2025-10-03 13:38:22,815 [DEBUG] RRF_merge | inputs=[100, 139, 223, 100] out=393
+2025-10-03 13:41:27,791 [DEBUG] [TIMER] CE_predict | ms=184975
+2025-10-03 13:41:27,795 [DEBUG] CE_stats | n=160 mi=0.0033686787355691195 ma=0.9168917536735535 mean=0.499551555274229
+2025-10-03 13:41:27,796 [DEBUG] [TIMER] CE_total | ms=184979
+2025-10-03 13:41:27,797 [DEBUG] AFTER_CE | n=160 above_thr=135 thr=0.06
+2025-10-03 13:41:27,819 [DEBUG] CE_threshold | kept=116 thr=0.06 cand=141
+2025-10-03 13:41:27,821 [DEBUG] FILTER_core_fields | before=116 after=116
+2025-10-03 13:41:27,822 [DEBUG] FILTER_valid_value | before=116 after=111
+2025-10-03 13:41:27,866 [DEBUG] RETRIEVE_DONE | returned=12
+2025-10-03 13:41:27,867 [DEBUG] [TIMER] retrieve_total | ms=189996
+2025-10-03 13:41:27,869 [DEBUG] ANSWER_docs | n=12 head=[('PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ', 'przeciętna miesięczna liczba świadczeń', '2025', 'ogółem', 758857.0), ('PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ', 'przeciętna miesięczna liczba świadczeń', '2025', 'opolskie', 16530.0), ('PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ', 'przeciętna miesięczna liczba świadczeń', '2025', 'dolnośląskie', 28810.0)]
+2025-10-03 13:41:27,997 [DEBUG] ANSWER_best | value=348 okres=2025 region=Emerytury finansowane z funduszu emerytalno-rentowego
+2025-10-03 13:41:27,998 [DEBUG] [TIMER] answer_total | ms=190127
+
+Oto znalezione dane tabelaryczne:
+348 (2025, Emerytury finansowane z funduszu emerytalno-rentowego).
+
++ ----------------------------------------------------------------------------- + -------------------------------------- + --------- + ----- + ----------------------------------------------------- + -------- +
+| dataset                                                                       | measure                                | type      | okres | region
+                   | value    |
++ ----------------------------------------------------------------------------- + -------------------------------------- + --------- + ----- + ----------------------------------------------------- + -------- +
+| PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ | przeciętna miesięczna liczba świadczeń | emerytury | 2025  | Emerytury finansowane z funduszu emerytalno-rentowego | 348.0    |
+| PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ | przeciętna miesięczna liczba świadczeń | emerytury | 2025  | ogółem
+                   | 758857.0 |
+| PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ | przeciętna miesięczna liczba świadczeń | emerytury | 2025  | opolskie
+                   | 16530.0  |
+                   | 28810.0  |
+| PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ | przeciętna miesięczna liczba świadczeń | emerytury | 2025  | łódzkie
+                   | 68702.0  |
+| PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ | przeciętna miesięczna liczba świadczeń | emerytury | 2025  | wielkopolskie
+                   | 81897.0  |
++ ----------------------------------------------------------------------------- + -------------------------------------- + --------- + ----- + ----------------------------------------------------- + -------- +
+
+[CZAS][DANE] 190.1 s
+
+Ty: dane ile wynosi przeciętne świadczenie emerytalne?
+2025-10-03 13:42:48,009 [DEBUG] Q | q=dane ile wynosi przeciętne świadczenie emerytalne?
+2025-10-03 13:42:48,078 [DEBUG] [TIMER] parse_query_fields | ms=68
+2025-10-03 13:42:48,079 [DEBUG] PARSED
+2025-10-03 13:42:48,079 [DEBUG] PREFS | prefer_typ=emerytury force_typ=True force_national=True is_country_query=False
+2025-10-03 13:42:48,138 [DEBUG] MQ_base | n=4 examples=['dane ile wynosi przecietne swiadczenie emerytalne?', 'dane ile wynosi przeciętne świadczenie emerytalne? ogółem', 'dane jaka jest liczba wynosi przecietne swiadczenie emerytalne?']
+2025-10-03 13:42:49,473 [DEBUG] [TIMER] MQ_llm | ms=1335
+2025-10-03 13:42:49,475 [DEBUG] MQ_final | n=12 examples=['dane ile wynosi przecietne swiadczenie emerytalne?', 'dane ile wynosi przeciętne świadczenie emerytalne? ogółem', 'dane jaka jest liczba wynosi przecietne swiadczenie emerytalne?', 'dane podaj wartość przecietne swiadczenie emerytalne?', 'ile wynosi przeciętna emerytura KRUS?']
+2025-10-03 13:42:49,475 [DEBUG] [TIMER] MQ_total | ms=1396
+2025-10-03 13:42:51,423 [DEBUG] dense_search_on | inputs=12 per_k=60 raw=720 uniq=213
+2025-10-03 13:42:51,423 [DEBUG] [TIMER] dense_search_on | ms=1947
+2025-10-03 13:42:52,482 [DEBUG] [TIMER] HyDE_llm | ms=990
+2025-10-03 13:42:52,483 [DEBUG] HyDE_final | n=4 sample=['dataset: - | measure: - | value: <X> | region: ogółem | period: - | typ: -', '<X>Przeciętne świadczenie emerytalne w KRUS to kwota zależna od stażu pracy i wysokości składek.', '<X>Średnia wartość emerytury rolniczej jest niższa niż w systemie ZUS, ale wyższa niż minimalne świadczenia socjalne.'] 
+2025-10-03 13:42:52,484 [DEBUG] [TIMER] HyDE_total | ms=1059
+2025-10-03 13:42:53,071 [DEBUG] dense_search_on | inputs=4 per_k=60 raw=240 uniq=177
+2025-10-03 13:42:53,071 [DEBUG] [TIMER] dense_search_on | ms=586
+2025-10-03 13:42:53,251 [DEBUG] dense_search | k=100 got=100
+2025-10-03 13:42:53,251 [DEBUG] [TIMER] dense_search | ms=180
+2025-10-03 13:42:53,258 [DEBUG] [TIMER] bm25_invoke | ms=5
+2025-10-03 13:42:53,258 [DEBUG] BM25 | got=100
+2025-10-03 13:42:53,262 [DEBUG] RRF_merge | inputs=[100, 213, 177, 100] out=343
+2025-10-03 13:46:13,342 [DEBUG] [TIMER] CE_predict | ms=200079
+2025-10-03 13:46:13,345 [DEBUG] CE_stats | n=160 mi=0.0007507838308811188 ma=0.8010483384132385 mean=0.311179010480555
+2025-10-03 13:46:13,346 [DEBUG] [TIMER] CE_total | ms=200084
+2025-10-03 13:46:13,347 [DEBUG] AFTER_CE | n=160 above_thr=125 thr=0.06
+2025-10-03 13:46:13,363 [DEBUG] CE_threshold | kept=117 thr=0.06 cand=152
+2025-10-03 13:46:13,364 [DEBUG] FILTER_core_fields | before=117 after=117
+2025-10-03 13:46:13,366 [DEBUG] FILTER_valid_value | before=117 after=107
+2025-10-03 13:46:13,408 [DEBUG] RETRIEVE_DONE | returned=12
+2025-10-03 13:46:13,409 [DEBUG] [TIMER] retrieve_total | ms=205399
+2025-10-03 13:46:13,413 [DEBUG] ANSWER_docs | n=12 head=[('EMERYTURY I RENTY REALIZOWANE PRZEZ KRUS', 'przeciętne świadczenie w zł', '2025-Q1', 'ogółem', 2184.49), ('PRZECIĘTNE MIESIĘCZNE ŚWIADCZENIE EMERYTALNO-RENTOWE WEDŁUG RODZAJÓW ŚWIADCZEŃ', 'Przeciętne świadczenie w zł', '2025-Q1', 'ogółem', 2107.21), ('PRZECIĘTNE MIESIĘCZNE ŚWIADCZENIE EMERYTALNO-RENTOWE WEDŁUG WOJEWÓDZTW ORAZ PRZECIĘTNE MIESIĘCZNE ŚWIADCZENIE EMERYTALNE WYPŁACONE PRZEZ MON, MSWiA i MS', 'Przeciętne świadczenie w zł', '2025', 'pomorskie', 2136.23)]       
+2025-10-03 13:46:13,533 [DEBUG] ANSWER_best | value=2 184,49 zł okres=2025-Q1 region=ogółem
+2025-10-03 13:46:13,534 [DEBUG] [TIMER] answer_total | ms=205525
+
+Oto znalezione dane tabelaryczne:
+2 184,49 zł (2025-Q1, ogółem).
+
++ -------------------------------------------------------------------------------------------------------------------------------------------------------- + --------------------------- + --------- + ------- + ------------------ + ------- +
+| dataset                                                                                                                                                  | measure
+       | type      | okres   | region             | value   |
++ -------------------------------------------------------------------------------------------------------------------------------------------------------- + --------------------------- + --------- + ------- + ------------------ + ------- +
+| EMERYTURY I RENTY REALIZOWANE PRZEZ KRUS                                                                                                                 | przeciętne świadczenie w zł | emerytury | 2025-Q1 | ogółem             | 2184.49 |
+| PRZECIĘTNE MIESIĘCZNE ŚWIADCZENIE EMERYTALNO-RENTOWE WEDŁUG RODZAJÓW ŚWIADCZEŃ                                                                           | Przeciętne świadczenie w zł | Emerytury | 2025-Q1 | ogółem             | 2107.21 |
+| PRZECIĘTNE MIESIĘCZNE ŚWIADCZENIE EMERYTALNO-RENTOWE WEDŁUG WOJEWÓDZTW ORAZ PRZECIĘTNE MIESIĘCZNE ŚWIADCZENIE EMERYTALNE WYPŁACONE PRZEZ MON, MSWiA i MS | Przeciętne świadczenie w zł | emerytury | 2025    | pomorskie          | 2136.23 |
+e w zł | emerytury | 2025    | kujawsko-pomorskie | 2156.26 |
+| PRZECIĘTNE MIESIĘCZNE ŚWIADCZENIE EMERYTALNO-RENTOWE WEDŁUG WOJEWÓDZTW ORAZ PRZECIĘTNE MIESIĘCZNE ŚWIADCZENIE EMERYTALNE WYPŁACONE PRZEZ MON, MSWiA i MS | Przeciętne świadczenie w zł | emerytury | 2025    | opolskie           | 2122.11 |
+| PRZECIĘTNE MIESIĘCZNE ŚWIADCZENIE EMERYTALNO-RENTOWE WEDŁUG WOJEWÓDZTW ORAZ PRZECIĘTNE MIESIĘCZNE ŚWIADCZENIE EMERYTALNE WYPŁACONE PRZEZ MON, MSWiA i MS | Przeciętne świadczenie w zł | emerytury | 2025    | podlaskie          | 2137.96 |
++ -------------------------------------------------------------------------------------------------------------------------------------------------------- + --------------------------- + --------- + ------- + ------------------ + ------- +
+
+[CZAS][DANE] 205.5 s
+
+Ty: dane ilu jest płatników składek do krus?
+2025-10-03 13:46:26,930 [DEBUG] Q | q=dane ilu jest płatników składek do krus?
+2025-10-03 13:46:26,956 [DEBUG] [TIMER] parse_query_fields | ms=25
+2025-10-03 13:46:26,957 [DEBUG] PARSED | dataset=liczba płatnikow składek w krus
+2025-10-03 13:46:26,957 [DEBUG] PREFS | prefer_typ=None force_typ=False force_national=True is_country_query=False
+2025-10-03 13:46:26,989 [DEBUG] MQ_base | n=3 examples=['dane ilu jest płatnikow składek do krus?', 'liczba płatników składek ogółem', 'dane ilu jest płatników składek do krus? ogółem']
+2025-10-03 13:46:31,060 [DEBUG] [TIMER] MQ_llm | ms=4067
+2025-10-03 13:46:31,061 [DEBUG] MQ_final | n=11 examples=['dane ilu jest płatnikow składek do krus?', 'liczba płatników składek ogółem', 'dane ilu jest płatników składek do krus? ogółem', 'liczba płatników składek w KRUS', 'liczba ubezpieczonych i płatników składek w KRUS']
+2025-10-03 13:46:31,061 [DEBUG] [TIMER] MQ_total | ms=4104
+2025-10-03 13:46:32,709 [DEBUG] dense_search_on | inputs=11 per_k=60 raw=660 uniq=267
+2025-10-03 13:46:32,710 [DEBUG] [TIMER] dense_search_on | ms=1647
+2025-10-03 13:46:33,729 [DEBUG] [TIMER] HyDE_llm | ms=976
+2025-10-03 13:46:33,731 [DEBUG] HyDE_final | n=6 sample=['dataset: liczba płatnikow składek w krus | measure: - | value: <X> | region: ogółem | period: - | typ: -', 'dataset: liczba ubezpieczonych i płatnikow składek | measure: - | value: <X> | region: ogółem | period: - | typ: -', 'dataset: liczba ubezpieczonych w krus | measure: - | value: <X> | region: ogółem | period: - | typ: -']
+2025-10-03 13:46:33,731 [DEBUG] [TIMER] HyDE_total | ms=1020
+2025-10-03 13:46:34,681 [DEBUG] dense_search_on | inputs=6 per_k=60 raw=360 uniq=140
+2025-10-03 13:46:34,681 [DEBUG] [TIMER] dense_search_on | ms=949
+2025-10-03 13:46:34,847 [DEBUG] dense_search | k=100 got=100
+2025-10-03 13:46:34,847 [DEBUG] [TIMER] dense_search | ms=165
+2025-10-03 13:46:34,855 [DEBUG] [TIMER] bm25_invoke | ms=7
+2025-10-03 13:46:34,856 [DEBUG] BM25 | got=100
+2025-10-03 13:46:34,859 [DEBUG] RRF_merge | inputs=[100, 267, 140, 100] out=351
+2025-10-03 13:49:08,873 [DEBUG] [TIMER] CE_predict | ms=154013
+2025-10-03 13:49:08,876 [DEBUG] CE_stats | n=160 mi=7.031473069218919e-05 ma=0.9915044903755188 mean=0.23985785047202626
+2025-10-03 13:49:08,877 [DEBUG] [TIMER] CE_total | ms=154017
+2025-10-03 13:49:08,878 [DEBUG] AFTER_CE | n=160 above_thr=81 thr=0.06
+2025-10-03 13:49:08,890 [DEBUG] CE_threshold | kept=81 thr=0.06 cand=157
+2025-10-03 13:49:08,891 [DEBUG] FILTER_core_fields | before=81 after=81
+2025-10-03 13:49:08,892 [DEBUG] FILTER_valid_value | before=81 after=81
+2025-10-03 13:49:08,913 [DEBUG] RETRIEVE_DONE | returned=12
+2025-10-03 13:49:08,914 [DEBUG] [TIMER] retrieve_total | ms=161983
+2025-10-03 13:49:08,917 [DEBUG] ANSWER_docs | n=12 head=[('Liczba płatników składek w KRUS', 'Liczba płatników składek', '2025-Q1', 'ogółem', 738756.0), ('Liczba płatników składek w KRUS', 'liczba płatników posiadających dział specjalny produkcji rolnej oraz gospodarstwo rolne', '2025-Q1', 'ogółem', 6687.0), ('Liczba płatników składek w KRUS', 'liczba płatników opłacających składki z tytułu prowadzenia samoistnego działu specjalnego produkcji rolnej', '2025-Q1', 'ogółem', 2047.0)]
+2025-10-03 13:49:09,022 [DEBUG] ANSWER_best | value=738 756 okres=2025-Q1 region=ogółem
+2025-10-03 13:49:09,022 [DEBUG] [TIMER] answer_total | ms=162092
+
+Oto znalezione dane tabelaryczne:
+738 756 (2025-Q1, ogółem).
+
++ ------------------------------- + ------------------------------------------------------------------------------------------------------------------------------------------- + 
+------ + ------- + ------ + -------- +
+| dataset                         | measure                                                                                                                                     | 
+type   | okres   | region | value    |
++ ------------------------------- + ------------------------------------------------------------------------------------------------------------------------------------------- + 
+------ + ------- + ------ + -------- +
+| Liczba płatników składek w KRUS | Liczba płatników składek                                                                                                                    | 
+ogółem | 2025-Q1 | ogółem | 738756.0 |
+| Liczba płatników składek w KRUS | liczba płatników posiadających dział specjalny produkcji rolnej oraz gospodarstwo rolne                                                     | 
+ogółem | 2025-Q1 | ogółem | 6687.0   |
+| Liczba płatników składek w KRUS | liczba płatników opłacających składki z tytułu prowadzenia samoistnego działu specjalnego produkcji rolnej                                  | 
+ogółem | 2025-Q1 | ogółem | 2047.0   |
+ogółem | 2025-Q1 | ogółem | 3195.0   |
+| Liczba ubezpieczonych w KRUS    | Liczba ubezpieczonych ogółem                                                                                                                | 
+ogółem | 2025-Q1 | ogółem | 985815.0 |
+| Liczba ubezpieczonych w KRUS    | liczba rolników                                                                                                                             | 
+ogółem | 2025-Q1 | ogółem | 587938.0 |
++ ------------------------------- + ------------------------------------------------------------------------------------------------------------------------------------------- + 
+------ + ------- + ------ + -------- +
+
+[CZAS][DANE] 162.1 s
+
+Ty: dane ile osób jest ubezpieczone w krus?
+2025-10-03 13:49:46,111 [DEBUG] Q | q=dane ile osób jest ubezpieczone w krus?
+2025-10-03 13:49:46,149 [DEBUG] [TIMER] parse_query_fields | ms=37
+2025-10-03 13:49:46,149 [DEBUG] PARSED
+2025-10-03 13:49:46,150 [DEBUG] PREFS | prefer_typ=None force_typ=False force_national=True is_country_query=False
+2025-10-03 13:49:46,178 [DEBUG] MQ_base | n=3 examples=['dane ile osob jest ubezpieczone w krus?', 'dane jaka jest liczba osob jest ubezpieczone w krus?', 'dane ile osób jest ubezpieczone w krus? ogółem']
+2025-10-03 13:49:47,102 [DEBUG] [TIMER] MQ_llm | ms=923
+2025-10-03 13:49:47,104 [DEBUG] MQ_final | n=11 examples=['dane ile osob jest ubezpieczone w krus?', 'dane jaka jest liczba osob jest ubezpieczone w krus?', 'dane ile osób jest ubezpieczone w krus? ogółem', 'ile osób jest ubezpieczonych w krus?', 'liczba ubezpieczonych w krus']
+2025-10-03 13:49:47,105 [DEBUG] [TIMER] MQ_total | ms=955
+2025-10-03 13:49:48,857 [DEBUG] dense_search_on | inputs=11 per_k=60 raw=660 uniq=101
+2025-10-03 13:49:48,857 [DEBUG] [TIMER] dense_search_on | ms=1751
+2025-10-03 13:49:49,717 [DEBUG] [TIMER] HyDE_llm | ms=820
+2025-10-03 13:49:49,719 [DEBUG] HyDE_final | n=4 sample=['dataset: - | measure: - | value: <X> | region: ogółem | period: - | typ: -', '<X>W KRUS ubezpieczonych jest <X> rolników i członków ich rodzin w ogólnym ujęciu.', '<X>Liczba osób objętych ubezpieczeniem w KRUS wynosi <X> dla całego kraju.']
+2025-10-03 13:49:49,720 [DEBUG] [TIMER] HyDE_total | ms=861
+2025-10-03 13:49:50,337 [DEBUG] dense_search_on | inputs=4 per_k=60 raw=240 uniq=137
+2025-10-03 13:49:50,337 [DEBUG] [TIMER] dense_search_on | ms=617
+2025-10-03 13:49:50,500 [DEBUG] dense_search | k=100 got=100
+2025-10-03 13:49:50,500 [DEBUG] [TIMER] dense_search | ms=162
+2025-10-03 13:49:50,505 [DEBUG] [TIMER] bm25_invoke | ms=4
+2025-10-03 13:49:50,505 [DEBUG] BM25 | got=100
+2025-10-03 13:49:50,506 [DEBUG] RRF_merge | inputs=[100, 101, 137, 100] out=279
+2025-10-03 13:52:22,415 [DEBUG] [TIMER] CE_predict | ms=151908
+2025-10-03 13:52:22,418 [DEBUG] CE_stats | n=160 mi=9.25622443901375e-05 ma=0.9807789325714111 mean=0.40092082523660794
+2025-10-03 13:52:22,419 [DEBUG] [TIMER] CE_total | ms=151912
+2025-10-03 13:52:22,420 [DEBUG] AFTER_CE | n=160 above_thr=86 thr=0.06
+2025-10-03 13:52:22,434 [DEBUG] CE_threshold | kept=86 thr=0.06 cand=158
+2025-10-03 13:52:22,435 [DEBUG] FILTER_core_fields | before=86 after=86
+2025-10-03 13:52:22,437 [DEBUG] FILTER_valid_value | before=86 after=86
+2025-10-03 13:52:22,462 [DEBUG] RETRIEVE_DONE | returned=12
+2025-10-03 13:52:22,463 [DEBUG] [TIMER] retrieve_total | ms=156350
+2025-10-03 13:52:22,465 [DEBUG] ANSWER_docs | n=12 head=[('Liczba ubezpieczonych\xa0w KRUS', 'Liczba ubezpieczonych ogółem', '2025-Q1', 'ogółem', 985815.0), ('Liczba ubezpieczonych\xa0w KRUS', 'liczba domowników', '2025-Q1', 'ogółem', 135374.0), ('Liczba ubezpieczonych\xa0w KRUS', 'liczba ubezpieczonych w okresie przyznania świadczenia pielęgnacyjnego lub specjalnego zasiłku opiekuńczego albo zasiłku dla opiekuna', '2025-Q1', 'ogółem', 9006.0)]
+2025-10-03 13:52:22,582 [DEBUG] ANSWER_best | value=985 815 okres=2025-Q1 region=ogółem
+2025-10-03 13:52:22,582 [DEBUG] [TIMER] answer_total | ms=156471
+
+Oto znalezione dane tabelaryczne:
+985 815 (2025-Q1, ogółem).
+
++ ---------------------------- + ------------------------------------------------------------------------------------------------------------------------------------- + ------ + 
+------- + ------ + -------- +
+| dataset                      | measure                                                                                                                               | type   | 
+okres   | region | value    |
++ ---------------------------- + ------------------------------------------------------------------------------------------------------------------------------------- + ------ + 
+------- + ------ + -------- +
+| Liczba ubezpieczonych w KRUS | Liczba ubezpieczonych ogółem                                                                                                          | ogółem | 
+2025-Q1 | ogółem | 985815.0 |
+| Liczba ubezpieczonych w KRUS | liczba domowników                                                                                                                     | ogółem | 
+2025-Q1 | ogółem | 135374.0 |
+| Liczba ubezpieczonych w KRUS | liczba ubezpieczonych w okresie przyznania świadczenia pielęgnacyjnego lub specjalnego zasiłku opiekuńczego albo zasiłku dla opiekuna | ogółem | 
+2025-Q1 | ogółem | 9006.0   |
+2025-Q1 | ogółem | 587938.0 |
+| Liczba ubezpieczonych w KRUS | liczba współmałżonków                                                                                                                 | ogółem | 2025-Q1 | ogółem | 249191.0 |
+| Liczba ubezpieczonych w KRUS | liczba pomocników rolnika                                                                                                             | ogółem | 2025-Q1 | ogółem | 4301.0   |
++ ---------------------------- + ------------------------------------------------------------------------------------------------------------------------------------- + ------ + ------- + ------ + -------- +
+
+[CZAS][DANE] 156.5 s
+
+Ty: ile współmałżonków jest ubezpieczone w krus? dane
+2025-10-03 13:52:52,335 [DEBUG] Q | q=ile współmałżonków jest ubezpieczone w krus? dane
+2025-10-03 13:52:52,379 [DEBUG] [TIMER] parse_query_fields | ms=43
+2025-10-03 13:52:52,379 [DEBUG] PARSED
+2025-10-03 13:52:52,379 [DEBUG] PREFS | prefer_typ=None force_typ=False force_national=True is_country_query=False
+2025-10-03 13:52:52,419 [DEBUG] MQ_base | n=3 examples=['ile współmałżonków jest ubezpieczone w krus? dane', 'jaka jest liczba wspołmałzonkow jest ubezpieczone w krus? dane', 'ile współmałżonków jest ubezpieczone w krus? dane ogółem']
+2025-10-03 13:52:54,213 [DEBUG] [TIMER] MQ_llm | ms=1793
+2025-10-03 13:52:54,215 [DEBUG] MQ_final | n=11 examples=['ile współmałżonków jest ubezpieczone w krus? dane', 'jaka jest liczba wspołmałzonkow jest ubezpieczone w krus? dane', 'ile współmałżonków jest ubezpieczone w krus? dane ogółem', 'ile współmałżonków rolników jest ubezpieczonych w krus?', 'ile osób powiązanych z gospodarstwami rolnymi ma ubezpieczenie krus?']
+2025-10-03 13:52:54,216 [DEBUG] [TIMER] MQ_total | ms=1836
+2025-10-03 13:52:55,940 [DEBUG] dense_search_on | inputs=11 per_k=60 raw=660 uniq=108
+2025-10-03 13:52:55,940 [DEBUG] [TIMER] dense_search_on | ms=1722
+2025-10-03 13:52:56,707 [DEBUG] [TIMER] HyDE_llm | ms=734
+2025-10-03 13:52:56,709 [DEBUG] HyDE_final | n=4 sample=['dataset: - | measure: - | value: <X> | region: ogółem | period: - | typ: -', '<X>Większość współmałżonków rolników jest ubezpieczona w KRUS.', 
+'<X>Ubezpieczenie w KRUS obejmuje znaczną część współmałżonków rolników.']
+2025-10-03 13:52:56,709 [DEBUG] [TIMER] HyDE_total | ms=768
+2025-10-03 13:52:57,282 [DEBUG] dense_search_on | inputs=4 per_k=60 raw=240 uniq=111
+2025-10-03 13:52:57,283 [DEBUG] [TIMER] dense_search_on | ms=572
+2025-10-03 13:52:57,419 [DEBUG] dense_search | k=100 got=100
+2025-10-03 13:52:57,419 [DEBUG] [TIMER] dense_search | ms=135
+2025-10-03 13:52:57,427 [DEBUG] [TIMER] bm25_invoke | ms=6
+2025-10-03 13:52:57,427 [DEBUG] BM25 | got=100
+2025-10-03 13:52:57,429 [DEBUG] RRF_merge | inputs=[100, 108, 111, 100] out=272
+2025-10-03 13:55:50,233 [DEBUG] [TIMER] CE_predict | ms=172803
+2025-10-03 13:55:50,236 [DEBUG] CE_stats | n=160 mi=3.258136348449625e-05 ma=0.9962767958641052 mean=0.18852074518511017
+2025-10-03 13:55:50,237 [DEBUG] [TIMER] CE_total | ms=172807
+2025-10-03 13:55:50,238 [DEBUG] AFTER_CE | n=160 above_thr=59 thr=0.06
+2025-10-03 13:55:50,252 [DEBUG] CE_threshold | kept=59 thr=0.06 cand=152
+2025-10-03 13:55:50,253 [DEBUG] FILTER_core_fields | before=59 after=59
+2025-10-03 13:55:50,254 [DEBUG] FILTER_valid_value | before=59 after=59
+2025-10-03 13:55:50,271 [DEBUG] RETRIEVE_DONE | returned=12
+2025-10-03 13:55:50,272 [DEBUG] [TIMER] retrieve_total | ms=177935
+2025-10-03 13:55:50,274 [DEBUG] ANSWER_docs | n=12 head=[('Liczba ubezpieczonych\xa0w KRUS', 'liczba współmałżonków', '2025-Q1', 'ogółem', 249191.0), ('Liczba ubezpieczonych\xa0w KRUS', 'liczba ubezpieczonych w okresie przyznania świadczenia pielęgnacyjnego lub specjalnego zasiłku opiekuńczego albo zasiłku dla opiekuna', '2025-Q1', 'ogółem', 9006.0), ('LICZBA UBEZPIECZONYCH W KRUS PRZY JEDNOCZESNYM 
+OBJĘCIU UBEZPIECZENIEM SPOŁECZNYM W ZUS Z INNEGO TYTUŁU 1)  WEDŁUG WOJEWÓDZTW', 'rolnicy/współmałżonkowie', '2025', 'dolnośląskie', 475.0)]
+2025-10-03 13:55:50,406 [DEBUG] ANSWER_best | value=249 191 okres=2025-Q1 region=ogółem
+2025-10-03 13:55:50,407 [DEBUG] [TIMER] answer_total | ms=178071
+
+Oto znalezione dane tabelaryczne:
+249 191 (2025-Q1, ogółem).
+
++ ---------------------------------------------------------------------------------------------------------------------------- + ------------------------------------------------------------------------------------------------------------------------------------- + ------ + ------- + ------------------- + -------- +
+| dataset                                                                                                                      | measure
+                                                              | type   | okres   | region              | value    |
++ ---------------------------------------------------------------------------------------------------------------------------- + ------------------------------------------------------------------------------------------------------------------------------------- + ------ + ------- + ------------------- + -------- +
+| Liczba ubezpieczonych w KRUS                                                                                                 | liczba współmałżonków
+                                                              | ogółem | 2025-Q1 | ogółem              | 249191.0 |
+| Liczba ubezpieczonych w KRUS                                                                                                 | liczba ubezpieczonych w okresie przyznania świadczenia pielęgnacyjnego lub specjalnego zasiłku opiekuńczego albo zasiłku dla opiekuna | ogółem | 2025-Q1 | ogółem              | 9006.0   |
+| LICZBA UBEZPIECZONYCH W KRUS PRZY JEDNOCZESNYM OBJĘCIU UBEZPIECZENIEM SPOŁECZNYM W ZUS Z INNEGO TYTUŁU 1)  WEDŁUG WOJEWÓDZTW | rolnicy/współmałżonkowie
+                                                              | Ogółem | 2025    | dolnośląskie        | 475.0    |
+                                                              | Ogółem | 2025    | warmińsko-mazurskie | 668.0    |
+| LICZBA UBEZPIECZONYCH W KRUS PRZY JEDNOCZESNYM OBJĘCIU UBEZPIECZENIEM SPOŁECZNYM W ZUS Z INNEGO TYTUŁU 1)  WEDŁUG WOJEWÓDZTW | rolnicy/współmałżonkowie
+                                                              | Ogółem | 2025    | podkarpackie        | 931.0    |
+| LICZBA UBEZPIECZONYCH W KRUS PRZY JEDNOCZESNYM OBJĘCIU UBEZPIECZENIEM SPOŁECZNYM W ZUS Z INNEGO TYTUŁU 1)  WEDŁUG WOJEWÓDZTW | rolnicy/współmałżonkowie
+                                                              | Ogółem | 2025    | śląskie             | 375.0    |
++ ---------------------------------------------------------------------------------------------------------------------------- + ------------------------------------------------------------------------------------------------------------------------------------- + ------ + ------- + ------------------- + -------- +
+
+[CZAS][DANE] 178.1 s
+
+Ty: dane ile wynosi przeciętna liczba Renty z tytułu niezdolności do pracy razem?
+2025-10-03 13:57:55,322 [DEBUG] Q | q=dane ile wynosi przeciętna liczba Renty z tytułu niezdolności do pracy razem?
+2025-10-03 13:57:55,390 [DEBUG] [TIMER] parse_query_fields | ms=67
+2025-10-03 13:57:55,391 [DEBUG] PARSED | measure=z tytułu niezdolnosci do pracy razem typ=renty z tytułu niezdolnosci do pracy razem
+2025-10-03 13:57:55,391 [DEBUG] PREFS | prefer_typ=None force_typ=False force_national=True is_country_query=False
+2025-10-03 13:57:55,459 [DEBUG] MQ_base | n=3 examples=['dane ile wynosi przecietna liczba Renty z tytułu niezdolnosci do pracy razem?', 'dane ile wynosi przeciętna liczba Renty z tytułu niezdolności do pracy razem? ogółem', 'dane podaj wartość przecietna liczba renty z tytułu niezdolnosci do pracy razem?']
+2025-10-03 13:57:59,778 [DEBUG] [TIMER] MQ_llm | ms=4290
+2025-10-03 13:57:59,780 [DEBUG] MQ_final | n=11 examples=['dane ile wynosi przecietna liczba Renty z tytułu niezdolnosci do pracy razem?', 'dane ile wynosi przeciętna liczba Renty z tytułu niezdolności do pracy razem? ogółem', 'dane podaj wartość przecietna liczba renty z tytułu niezdolnosci do pracy razem?', 'ile wynosi przeciętna liczba rent z tytułu niezdolności do pracy razem?', 'jaka jest średnia wartość renty z tytułu niezdolności do pracy razem?']
+2025-10-03 13:57:59,781 [DEBUG] [TIMER] MQ_total | ms=4389
+2025-10-03 13:58:01,477 [DEBUG] dense_search_on | inputs=11 per_k=60 raw=660 uniq=191
+2025-10-03 13:58:01,478 [DEBUG] [TIMER] dense_search_on | ms=1696
+2025-10-03 13:58:02,685 [DEBUG] [TIMER] HyDE_llm | ms=1084
+2025-10-03 13:58:02,686 [DEBUG] HyDE_final | n=6 sample=['dataset: - | measure: z tytułu niezdolnosci do pracy razem | value: <X> | region: ogółem | period: - | typ: renty z tytułu niezdolnosci do pracy razem', 'dataset: - | measure: z tytułu niezdolnosci do pracy | value: <X> | region: ogółem | period: - | typ: renty z tytułu niezdolnosci do pracy', 'dataset: - | measure: z tytułu niezdolnosci do pracy wypadkowe | value: <X> | region: ogółem | period: - | typ: renty z tytułu niezdolnosci do pracy ogołem']
+2025-10-03 13:58:02,687 [DEBUG] [TIMER] HyDE_total | ms=1207
+2025-10-03 13:58:03,588 [DEBUG] dense_search_on | inputs=6 per_k=60 raw=360 uniq=157
+2025-10-03 13:58:03,588 [DEBUG] [TIMER] dense_search_on | ms=900
+2025-10-03 13:58:03,709 [DEBUG] dense_search | k=100 got=100
+2025-10-03 13:58:03,709 [DEBUG] [TIMER] dense_search | ms=120
+2025-10-03 13:58:03,724 [DEBUG] [TIMER] bm25_invoke | ms=14
+2025-10-03 13:58:03,725 [DEBUG] BM25 | got=100
+2025-10-03 13:58:03,728 [DEBUG] RRF_merge | inputs=[100, 191, 157, 100] out=244
+2025-10-03 14:01:39,621 [DEBUG] [TIMER] CE_predict | ms=215893
+2025-10-03 14:01:39,626 [DEBUG] CE_stats | n=160 mi=0.008724546059966087 ma=0.9594295024871826 mean=0.49521094295196233
+2025-10-03 14:01:39,627 [DEBUG] [TIMER] CE_total | ms=215898
+2025-10-03 14:01:39,628 [DEBUG] AFTER_CE | n=160 above_thr=146 thr=0.06
+2025-10-03 14:01:39,646 [DEBUG] CE_threshold | kept=134 thr=0.06 cand=142
+2025-10-03 14:01:39,647 [DEBUG] FILTER_core_fields | before=134 after=134
+2025-10-03 14:01:39,649 [DEBUG] FILTER_valid_value | before=134 after=128
+2025-10-03 14:01:39,841 [DEBUG] RETRIEVE_DONE | returned=12
+2025-10-03 14:01:39,842 [DEBUG] [TIMER] retrieve_total | ms=224519
+2025-10-03 14:01:39,844 [DEBUG] ANSWER_docs | n=12 head=[('EMERYTURY I RENTY REALIZOWANE PRZEZ KRUS', 'przeciętna miesięczna liczba świadczeniobiorców', '2025-Q1', 'ogółem', 10946.0), ('PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ', 'przeciętna miesięczna liczba świadczeń', '2025', 'dolnośląskie', 5689.0), ('PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ', 'przeciętna miesięczna liczba świadczeń', '2025', 'pomorskie', 6276.0)]
+2025-10-03 14:01:40,012 [DEBUG] ANSWER_best | value=10 946 okres=2025-Q1 region=ogółem
+2025-10-03 14:01:40,013 [DEBUG] [TIMER] answer_total | ms=224690
+
+Oto znalezione dane tabelaryczne:
+10 946 (2025-Q1, ogółem).
+
++ ----------------------------------------------------------------------------- + ----------------------------------------------- + ---------------------------------------------------- + ------- + ------------------ + -------- +
+| dataset                                                                       | measure                                         | type                                                 | okres   | region             | value    |
++ ----------------------------------------------------------------------------- + ----------------------------------------------- + ---------------------------------------------------- + ------- + ------------------ + -------- +
+| EMERYTURY I RENTY REALIZOWANE PRZEZ KRUS                                      | przeciętna miesięczna liczba świadczeniobiorców | renty z tytułu niezdolności do pracy                 | 2025-Q1 | ogółem             | 10946.0  |
+| PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ | przeciętna miesięczna liczba świadczeń          | renty  z tytułu niezdolności do pracy ogółem         | 2025    | dolnośląskie       | 5689.0   |
+| PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ | przeciętna miesięczna liczba świadczeń          | renty  z tytułu niezdolności do pracy ogółem         | 2025    | pomorskie          | 6276.0   |
+em             | 10946.0  |
+| PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ | przeciętna miesięczna liczba świadczeń          | renty  z tytułu niezdolności do pracy ogółem         | 2025    | ogółem             | 163830.0 |
+| PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ | przeciętna miesięczna liczba świadczeń          | renty  z tytułu niezdolności do pracy ogółem         | 2025    | kujawsko-pomorskie | 11563.0  |
++ ----------------------------------------------------------------------------- + ----------------------------------------------- + ---------------------------------------------------- + ------- + ------------------ + -------- +
+
+[CZAS][DANE] 224.7 s
+
+Ty: dane ile wypłacono na renty socjalne w tym roku?
+2025-10-03 14:01:53,476 [DEBUG] Q | q=dane ile wypłacono na renty socjalne w tym roku?
+2025-10-03 14:01:53,520 [DEBUG] [TIMER] parse_query_fields | ms=43
+2025-10-03 14:01:53,521 [DEBUG] PARSED
+2025-10-03 14:01:53,521 [DEBUG] PREFS | prefer_typ=None force_typ=False force_national=True is_country_query=False
+2025-10-03 14:01:53,563 [DEBUG] MQ_base | n=3 examples=['dane ile wypłacono na renty socjalne w tym roku?', 'dane ile wypłacono na renty socjalne w tym roku? ogółem', 'dane jaka jest liczba wypłacono na renty socjalne w tym roku?']
+2025-10-03 14:01:54,941 [DEBUG] [TIMER] MQ_llm | ms=1377
+2025-10-03 14:01:54,942 [DEBUG] MQ_final | n=11 examples=['dane ile wypłacono na renty socjalne w tym roku?', 'dane ile wypłacono na renty socjalne w tym roku? ogółem', 'dane jaka jest liczba wypłacono na renty socjalne w tym roku?', 'ile wypłacono na renty socjalne w 2023 roku?', 'jaka kwota została przeznaczona na renty socjalne w bieżącym roku?']
+2025-10-03 14:01:54,943 [DEBUG] [TIMER] MQ_total | ms=1421
+2025-10-03 14:01:56,616 [DEBUG] dense_search_on | inputs=11 per_k=60 raw=660 uniq=161
+2025-10-03 14:01:56,616 [DEBUG] [TIMER] dense_search_on | ms=1673
+2025-10-03 14:01:57,836 [DEBUG] [TIMER] HyDE_llm | ms=1144
+2025-10-03 14:01:57,837 [DEBUG] HyDE_final | n=4 sample=['dataset: - | measure: - | value: <X> | region: ogółem | period: - | typ: -', '<X>Wypłaty na renty socjalne w tym roku obejmują środki przeznaczone na wsparcie osób uprawnionych do świadczeń z tytułu niezdolności do pracy.', '<X>Łączna kwota wypłat na renty socjalne w bieżącym roku stanowi istotną część wydatków budżetowych na zabezpieczenie społeczne.']
+2025-10-03 14:01:57,838 [DEBUG] [TIMER] HyDE_total | ms=1220
+2025-10-03 14:01:58,637 [DEBUG] dense_search_on | inputs=4 per_k=60 raw=240 uniq=200
+2025-10-03 14:01:58,638 [DEBUG] [TIMER] dense_search_on | ms=799
+2025-10-03 14:01:58,771 [DEBUG] dense_search | k=100 got=100
+2025-10-03 14:01:58,772 [DEBUG] [TIMER] dense_search | ms=133
+2025-10-03 14:01:58,779 [DEBUG] [TIMER] bm25_invoke | ms=7
+2025-10-03 14:01:58,779 [DEBUG] BM25 | got=100
+2025-10-03 14:01:58,783 [DEBUG] RRF_merge | inputs=[100, 161, 200, 100] out=372
+2025-10-03 14:05:36,640 [DEBUG] [TIMER] CE_predict | ms=217856
+2025-10-03 14:05:36,643 [DEBUG] CE_stats | n=160 mi=0.00028847824432887137 ma=0.19377979636192322 mean=0.017549196474465133
+2025-10-03 14:05:36,644 [DEBUG] [TIMER] CE_total | ms=217861
+2025-10-03 14:05:36,645 [DEBUG] AFTER_CE | n=160 above_thr=8 thr=0.06
+2025-10-03 14:05:36,656 [DEBUG] CE_threshold | kept=8 thr=0.06 cand=144
+2025-10-03 14:05:36,657 [DEBUG] FILTER_core_fields | before=8 after=8
+2025-10-03 14:05:36,658 [DEBUG] FILTER_valid_value | before=8 after=8
+2025-10-03 14:05:36,662 [DEBUG] RETRIEVE_DONE | returned=3
+2025-10-03 14:05:36,663 [DEBUG] [TIMER] retrieve_total | ms=223186
+2025-10-03 14:05:36,666 [DEBUG] ANSWER_docs | n=3 head=[('ŚWIADCZENIA ZLECONE DO WYPŁATY KASIE ROLNICZEGO UBEZPIECZENIA SPOŁECZNEGO', 'Kwota wypłat w zł', '2025-Q1', 'ogółem', 65762296.26), ('ŚWIADCZENIA ZLECONE DO WYPŁATY KASIE ROLNICZEGO UBEZPIECZENIA SPOŁECZNEGO', 'Przeciętna miesięczna liczba osób', '2025-Q1', 'ogółem', 11990.0), ('ŚWIADCZENIA ZLECONE DO WYPŁATY KASIE ROLNICZEGO UBEZPIECZENIA SPOŁECZNEGO', 'Przeciętne świadczenie w zł', '2025-Q1', 'ogółem', 1828.25)]
+2025-10-03 14:05:36,838 [DEBUG] ANSWER_best | value=65 762 296,26 zł okres=2025-Q1 region=ogółem
+2025-10-03 14:05:36,839 [DEBUG] [TIMER] answer_total | ms=223363
+
+Oto znalezione dane tabelaryczne:
+65 762 296,26 zł (2025-Q1, ogółem).
++ ------------------------------------------------------------------------- + --------------------------------- + -------------- + ------- + ------ + ----------- +
+| dataset                                                                   | measure                           | type           | okres   | region | value       |
++ ------------------------------------------------------------------------- + --------------------------------- + -------------- + ------- + ------ + ----------- +
+| ŚWIADCZENIA ZLECONE DO WYPŁATY KASIE ROLNICZEGO UBEZPIECZENIA SPOŁECZNEGO | Kwota wypłat w zł                 | RENTY SOCJALNE | 2025-Q1 | ogółem | 65762296.26 |
+| ŚWIADCZENIA ZLECONE DO WYPŁATY KASIE ROLNICZEGO UBEZPIECZENIA SPOŁECZNEGO | Przeciętna miesięczna liczba osób | RENTY SOCJALNE | 2025-Q1 | ogółem | 11990.0     |
+| ŚWIADCZENIA ZLECONE DO WYPŁATY KASIE ROLNICZEGO UBEZPIECZENIA SPOŁECZNEGO | Przeciętne świadczenie w zł       | RENTY SOCJALNE | 2025-Q1 | ogółem | 1828.25     |
++ ------------------------------------------------------------------------- + --------------------------------- + -------------- + ------- + ------ + ----------- +
+
+[CZAS][DANE] 223.4 s

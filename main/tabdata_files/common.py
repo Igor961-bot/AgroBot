@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 # common.py
 
-# stdlib
 import os, re, unicodedata, logging, time
 from contextlib import contextmanager
 from typing import List, Dict, Any, Optional
 
-# projekt (jeśli tu używasz stałych pól)
 from data_schema import (
     F_DATASET, F_MEASURE, F_REGION, F_TYPE
 )
@@ -15,7 +13,7 @@ from data_schema import (
 CSV_DIR: str = os.getenv("CSV_DIR", ".data/all_data.csv")
 
 # Włączniki dla modułu danych
-LLM_MQ_ENABLED = True           # MultiQuery przez LLM
+LLM_MQ_ENABLED = True          
 MQ_BASE_VARIANTS = 4
 MQ_LLM_VARIANTS  = 8
 
@@ -238,9 +236,7 @@ def _match_canon_with_inflection(q_norm: str, canon: str) -> bool:
     return re.search(pat, q_norm) is not None
 
 def match_region_text(q: str, min_score: float = 0.58) -> Optional[str]:
-    """
-    Bezpieczne wykrywanie regionu/kraju z tekstu (zabezpiecza przed 'dane'→'Dania').
-    """
+    # Bezpieczne wykrywanie regionu/kraju z tekstu (zabezpiecza przed 'dane'→'Dania').
     if not REGION_INDEX:
         return None
     q_norm  = norm_text(q)
@@ -296,6 +292,7 @@ def _query_mentions_foreign(q: str) -> bool:
 
 def _is_country_name(name: Optional[str]) -> bool:
     return norm_text(name or "") in REGION_TAXONOMY["country"]
+
 # Fuzzy (rapidfuzz → difflib fallback)
 try:
     from rapidfuzz import fuzz

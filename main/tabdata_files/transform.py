@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 # transform.py
-# stdlib
 import re
 from typing import List, Dict, Any, Tuple, Optional
-
-# third-party
 from langchain_core.documents import Document
 
-# projekt
 from data_schema import F_DATASET, F_MEASURE, F_VALUE, F_REGION, F_OKRES, F_TYPE, valid_value
 from .common import norm_text, _is_national, _soft_match
 

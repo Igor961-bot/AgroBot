@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
 # data_search.py
 
-# stdlib
 import os, re
 from typing import List, Dict, Any, Tuple, Optional
-
-# third-party
 import pandas as pd
 import numpy as np
 from langchain_core.documents import Document
 from langchain_community.retrievers import BM25Retriever
 from langchain_openai import ChatOpenAI
 
-# projekt
 from data_schema import (
     F_DATASET, F_MEASURE, F_REGION, F_OKRES, F_TYPE, F_SRC, F_ROW,
     row_to_document, norm_period, ensure_core_meta, has_core_fields, valid_value,
@@ -87,7 +83,7 @@ dbg("VOCAB_SIZES",
     typ=len(FIELD_VOCAB["typ"])
 )
 
-# Po zbudowaniu słowników uzupełniamy taksonomię i indeks
+# Po zbudowaniu słowników taksonomia i indeks
 rebuild_region_taxonomy()
 
 build_region_match_index()
@@ -102,7 +98,7 @@ def _collection_count(vs) -> int:
     except Exception:
         return 0
 
-# Gdy kolekcja pusta – dociśnij dokumenty (ad-hoc) i zapisz
+# Gdy kolekcja pusta
 if _collection_count(vectorstore) == 0 and all_docs:
     with timer("CHROMA_add_documents"):
         vectorstore.add_documents(all_docs)
@@ -141,7 +137,7 @@ def dense_search_on(texts: List[str], k: int = 40) -> List[Document]:
         return uniq
 
 
-# ===================== CZĘŚĆ 2/2: MQ+HyDE (LM Studio), RRF, CE, Retrieve, Answer =====================
+# ===================== MQ+HyDE (LM Studio), RRF, CE, Retrieve, Answer =====================
 from langchain_openai import ChatOpenAI
 
 LLM_BASE_URL = os.getenv("LLM_BASE_URL", "http://127.0.0.1:1234/v1").rstrip("/")
