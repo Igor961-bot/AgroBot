@@ -3,7 +3,7 @@ import re
 import time
 from krus_final import ask, want_follow_up, reset_context
 from tabdata import answer as answer_tab
-
+#from tabdata_files.interact import answer as answer_tab
 WORD_DANE_RE = re.compile(r"\bdane\b", re.IGNORECASE)
 KEY_WORDS = {"dane", "statystyczne", "statystyki"}
 
