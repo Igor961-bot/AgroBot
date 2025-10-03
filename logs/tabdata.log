@@ -1,0 +1,259 @@
+2025-10-03 12:31:49,508 [DEBUG] CFG | CSV_DIR=./data/all_data.csv LLM_MQ_ENABLED=True MQ_BASE_VARIANTS=4 MQ_LLM_VARIANTS=8 USE_HYDE=True HYDE_BASE=3 HYDE_LLM=3 MIN_CE_FOR_CONTEXT=0.06 RRF_WEIGHTS={'dense_q': 1.0, 'dense_mq': 0.95, 'hyde': 0.7, 'bm25': 1.0} FAST_DATA_MODE=False TAB_CE_MAX=None TAB_RRF_K=160
+2025-10-03 12:31:50,710 [DEBUG] [TIMER] CSV_build:all_data.csv | ms=1198
+2025-10-03 12:31:50,711 [DEBUG] DOCS_BUILT | count=2767
+2025-10-03 12:31:50,711 [DEBUG] VOCAB_SIZES | dataset=35 measure=119 region=67 typ=53
+2025-10-03 12:31:50,939 [DEBUG] CHROMA_STAT | vectors=5534
+2025-10-03 12:31:51,081 [DEBUG] BM25_INIT | docs=2767
+2025-10-03 12:31:54,343 [DEBUG] Q | q=dane ile wynosi przeciętna liczba świadczeń emerytalnych?
+2025-10-03 12:31:54,436 [DEBUG] [TIMER] parse_query_fields | ms=88
+2025-10-03 12:31:54,436 [DEBUG] PARSED
+2025-10-03 12:31:54,437 [DEBUG] PREFS | prefer_typ=emerytury force_typ=True force_national=True is_country_query=False
+2025-10-03 12:31:54,493 [DEBUG] MQ_base | n=3 examples=['dane podaj wartość przecietna liczba swiadczen emerytalnych?', 'dane ile wynosi przecietna liczba swiadczen emerytalnych?', 'dane jaka jest liczba wynosi przecietna liczba swiadczen emerytalnych?']
+2025-10-03 12:31:56,289 [DEBUG] [TIMER] MQ_llm | ms=1795
+2025-10-03 12:31:56,291 [DEBUG] MQ_final | n=11 examples=['dane podaj wartość przecietna liczba swiadczen emerytalnych?', 'dane ile wynosi przecietna liczba swiadczen emerytalnych?', 'dane jaka jest liczba wynosi przecietna liczba swiadczen emerytalnych?', 'ile wynosi przeciętna liczba świadczeń emerytalnych wypłacanych przez KRUS?', 'jaka jest średnia roczna liczba świadczeń emerytalnych w systemie KRUS?']
+2025-10-03 12:31:56,291 [DEBUG] [TIMER] MQ_total | ms=1854
+2025-10-03 12:31:57,839 [DEBUG] dense_search_on | inputs=11 per_k=60 raw=660 uniq=139
+2025-10-03 12:31:57,840 [DEBUG] [TIMER] dense_search_on | ms=1548
+2025-10-03 12:31:58,731 [DEBUG] [TIMER] HyDE_llm | ms=822
+2025-10-03 12:31:58,732 [DEBUG] HyDE_final | n=4 sample=['dataset: - | measure: - | value: <X> | region: ogółem | period: - | typ: -', '<X>Przeciętna liczba świadczeń emerytalnych w ogólnym ujęciu rośnie systematycznie.', '<X>Średnia liczba wypłacanych świadczeń emerytalnych zwiększa się wraz z upływem czasu.']
+2025-10-03 12:31:58,732 [DEBUG] [TIMER] HyDE_total | ms=891
+2025-10-03 12:31:59,384 [DEBUG] dense_search_on | inputs=4 per_k=60 raw=240 uniq=145
+2025-10-03 12:31:59,385 [DEBUG] [TIMER] dense_search_on | ms=652
+2025-10-03 12:31:59,537 [DEBUG] dense_search | k=100 got=100
+2025-10-03 12:31:59,537 [DEBUG] [TIMER] dense_search | ms=151
+2025-10-03 12:31:59,549 [DEBUG] [TIMER] bm25_invoke | ms=11
+2025-10-03 12:31:59,550 [DEBUG] BM25 | got=100
+2025-10-03 12:31:59,553 [DEBUG] RRF_merge | inputs=[100, 139, 145, 100] out=293
+2025-10-03 12:35:40,353 [DEBUG] [TIMER] CE_predict | ms=220799
+2025-10-03 12:35:40,356 [DEBUG] CE_stats | n=160 mi=0.0033686787355691195 ma=0.9168917536735535 mean=0.4810774934812798
+2025-10-03 12:35:40,357 [DEBUG] [TIMER] CE_total | ms=220803
+2025-10-03 12:35:40,358 [DEBUG] AFTER_CE | n=160 above_thr=131 thr=0.06
+2025-10-03 12:35:40,368 [DEBUG] CE_threshold | kept=131 thr=0.06 cand=160
+2025-10-03 12:35:40,371 [DEBUG] FILTER_core_fields | before=131 after=131
+2025-10-03 12:35:40,372 [DEBUG] FILTER_valid_value | before=131 after=113
+2025-10-03 12:35:40,424 [DEBUG] RETRIEVE_DONE | returned=12
+2025-10-03 12:35:40,425 [DEBUG] [TIMER] retrieve_total | ms=226077
+2025-10-03 12:35:40,428 [DEBUG] ANSWER_docs | n=12 head=[('EMERYTURY I RENTY REALIZOWANE PRZEZ KRUS', 'przeciętna miesięczna liczba świadczeniobiorców', '2025-Q1', 'ogółem', 760307.0), ('EMERYTURY I RENTY REALIZOWANE PRZEZ KRUS', 'przeciętne świadczenie w zł', '2025-Q1', 'ogółem', 2184.49), ('PRZECIĘTNE MIESIĘCZNE ŚWIADCZENIE EMERYTALNO-RENTOWE WEDŁUG RODZAJÓW ŚWIADCZEŃ', 'Przeciętne świadczenie w zł', '2025-Q1', 'ogółem', 2107.21)]
+2025-10-03 12:35:40,554 [DEBUG] ANSWER_best | value=722 okres=2025 region=ogółem
+2025-10-03 12:35:40,555 [DEBUG] [TIMER] answer_total | ms=226212
+2025-10-03 12:50:15,166 [DEBUG] CFG | CSV_DIR=./data/all_data.csv LLM_MQ_ENABLED=True MQ_BASE_VARIANTS=4 MQ_LLM_VARIANTS=8 USE_HYDE=True HYDE_BASE=3 HYDE_LLM=3 MIN_CE_FOR_CONTEXT=0.06 RRF_WEIGHTS={'dense_q': 1.0, 'dense_mq': 0.95, 'hyde': 0.7, 'bm25': 1.0} FAST_DATA_MODE=False TAB_CE_MAX=None TAB_RRF_K=160
+2025-10-03 12:50:15,199 [DEBUG] [TIMER] CSV_build:all_data.csv | ms=19
+2025-10-03 12:50:15,200 [DEBUG] DOCS_BUILT | count=0
+2025-10-03 12:50:15,200 [DEBUG] VOCAB_SIZES | dataset=1 measure=1 region=1 typ=0
+2025-10-03 12:50:15,349 [DEBUG] CHROMA_STAT | vectors=5534
+2025-10-03 12:52:09,261 [DEBUG] CFG | CSV_DIR=./data/all_data.csv LLM_MQ_ENABLED=True MQ_BASE_VARIANTS=4 MQ_LLM_VARIANTS=8 USE_HYDE=True HYDE_BASE=3 HYDE_LLM=3 MIN_CE_FOR_CONTEXT=0.06 RRF_WEIGHTS={'dense_q': 1.0, 'dense_mq': 0.95, 'hyde': 0.7, 'bm25': 1.0} FAST_DATA_MODE=False TAB_CE_MAX=None TAB_RRF_K=160
+2025-10-03 12:52:10,297 [DEBUG] [TIMER] CSV_build:all_data.csv | ms=1021
+2025-10-03 12:52:10,298 [DEBUG] DOCS_BUILT | count=2767
+2025-10-03 12:52:10,298 [DEBUG] VOCAB_SIZES | dataset=35 measure=119 region=67 typ=53
+2025-10-03 12:52:10,487 [DEBUG] CHROMA_STAT | vectors=5534
+2025-10-03 12:52:10,617 [DEBUG] BM25_INIT | docs=2767
+2025-10-03 12:52:47,337 [DEBUG] Q | q=dane ile wynosi przeciętna liczba świadczeń emerytalnych?\
+2025-10-03 12:52:47,412 [DEBUG] [TIMER] parse_query_fields | ms=73
+2025-10-03 12:52:47,412 [DEBUG] PARSED
+2025-10-03 12:52:47,413 [DEBUG] PREFS | prefer_typ=emerytury force_typ=True force_national=True is_country_query=False
+2025-10-03 12:52:47,479 [DEBUG] MQ_base | n=3 examples=['dane jaka jest liczba wynosi przecietna liczba swiadczen emerytalnych?\\', 'dane podaj wartość przecietna liczba swiadczen emerytalnych?\\', 'dane ile wynosi przeciętna liczba świadczeń emerytalnych?\\']
+2025-10-03 12:52:49,259 [DEBUG] [TIMER] MQ_llm | ms=1779
+2025-10-03 12:52:49,261 [DEBUG] MQ_final | n=10 examples=['dane jaka jest liczba wynosi przecietna liczba swiadczen emerytalnych?\\', 'dane podaj wartość przecietna liczba swiadczen emerytalnych?\\', 'dane ile wynosi przeciętna liczba świadczeń emerytalnych?\\', 'ile wynosi przeciętna liczba świadczeń emerytalnych wypłacanych przez KRUS?', 'jaka jest średnia roczna liczba świadczeń emerytalnych w systemie KRUS?']
+2025-10-03 12:52:49,261 [DEBUG] [TIMER] MQ_total | ms=1848
+2025-10-03 12:52:50,824 [DEBUG] dense_search_on | inputs=10 per_k=60 raw=600 uniq=144
+2025-10-03 12:52:50,824 [DEBUG] [TIMER] dense_search_on | ms=1562
+2025-10-03 12:52:51,809 [DEBUG] [TIMER] HyDE_llm | ms=928
+2025-10-03 12:52:51,810 [DEBUG] HyDE_final | n=4 sample=['dataset: - | measure: - | value: <X> | region: ogółem | period: - | typ: -', '<X>Przeciętna liczba świadczeń emerytalnych w analizowanym okresie była zbliżona do <X>.', '<X>Średnia liczba świadczeń emerytalnych wypłacanych ogółem wynosiła około <X> miesięcznie.']
+2025-10-03 12:52:51,811 [DEBUG] [TIMER] HyDE_total | ms=984
+2025-10-03 12:52:52,417 [DEBUG] dense_search_on | inputs=4 per_k=60 raw=240 uniq=143
+2025-10-03 12:52:52,418 [DEBUG] [TIMER] dense_search_on | ms=606
+2025-10-03 12:52:52,546 [DEBUG] dense_search | k=100 got=100
+2025-10-03 12:52:52,547 [DEBUG] [TIMER] dense_search | ms=128
+2025-10-03 12:52:52,555 [DEBUG] [TIMER] bm25_invoke | ms=8
+2025-10-03 12:52:52,556 [DEBUG] BM25 | got=100
+2025-10-03 12:52:52,559 [DEBUG] RRF_merge | inputs=[100, 144, 143, 100] out=289
+2025-10-03 12:55:32,364 [DEBUG] [TIMER] CE_predict | ms=159804
+2025-10-03 12:55:32,368 [DEBUG] CE_stats | n=160 mi=0.004310423042625189 ma=0.8558799624443054 mean=0.4531394010875374
+2025-10-03 12:55:32,369 [DEBUG] [TIMER] CE_total | ms=159808
+2025-10-03 12:55:32,370 [DEBUG] AFTER_CE | n=160 above_thr=134 thr=0.06
+2025-10-03 12:55:32,380 [DEBUG] CE_threshold | kept=134 thr=0.06 cand=160
+2025-10-03 12:55:32,382 [DEBUG] FILTER_core_fields | before=134 after=134
+2025-10-03 12:55:32,383 [DEBUG] FILTER_valid_value | before=134 after=115
+2025-10-03 12:55:32,439 [DEBUG] RETRIEVE_DONE | returned=12
+2025-10-03 12:55:32,440 [DEBUG] [TIMER] retrieve_total | ms=165101
+2025-10-03 12:55:32,443 [DEBUG] ANSWER_docs | n=12 head=[('PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ', 'przeciętna miesięczna liczba świadczeń', '2025', 'MSWiA', 265.0), ('PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ', 'przeciętna miesięczna liczba świadczeń', '2025', 'MON', 61.0), ('PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ', 'przeciętna miesięczna liczba świadczeń', '2025', 'ogółem', 758857.0)]
+2025-10-03 12:55:32,570 [DEBUG] ANSWER_best | value=265 okres=2025 region=MSWiA
+2025-10-03 12:55:32,571 [DEBUG] [TIMER] answer_total | ms=165233
+2025-10-03 12:57:39,157 [DEBUG] CFG | CSV_DIR=./data/all_data.csv LLM_MQ_ENABLED=True MQ_BASE_VARIANTS=4 MQ_LLM_VARIANTS=8 USE_HYDE=True HYDE_BASE=3 HYDE_LLM=3 MIN_CE_FOR_CONTEXT=0.06 RRF_WEIGHTS={'dense_q': 1.0, 'dense_mq': 0.95, 'hyde': 0.7, 'bm25': 1.0} FAST_DATA_MODE=False TAB_CE_MAX=None TAB_RRF_K=160
+2025-10-03 12:57:40,505 [DEBUG] [TIMER] CSV_build:all_data.csv | ms=1290
+2025-10-03 12:57:40,506 [DEBUG] DOCS_BUILT | count=2767
+2025-10-03 12:57:40,507 [DEBUG] VOCAB_SIZES | dataset=35 measure=119 region=67 typ=53
+2025-10-03 12:57:40,691 [DEBUG] CHROMA_STAT | vectors=5534
+2025-10-03 12:57:40,815 [DEBUG] BM25_INIT | docs=2767
+2025-10-03 12:57:59,946 [DEBUG] Q | q=dane ile wynosi przeciętna liczba świadczeń emerytalnych?
+2025-10-03 12:58:00,037 [DEBUG] [TIMER] parse_query_fields | ms=90
+2025-10-03 12:58:00,037 [DEBUG] PARSED
+2025-10-03 12:58:00,038 [DEBUG] PREFS | prefer_typ=emerytury force_typ=True force_national=True is_country_query=False
+2025-10-03 12:58:00,127 [DEBUG] MQ_base | n=3 examples=['dane ile wynosi przeciętna liczba świadczeń emerytalnych?', 'dane ile wynosi przeciętna liczba świadczeń emerytalnych? ogółem', 'dane jaka jest liczba wynosi przecietna liczba swiadczen emerytalnych?']
+2025-10-03 12:58:01,721 [DEBUG] [TIMER] MQ_llm | ms=1592
+2025-10-03 12:58:01,722 [DEBUG] MQ_final | n=10 examples=['dane ile wynosi przeciętna liczba świadczeń emerytalnych?', 'dane ile wynosi przeciętna liczba świadczeń emerytalnych? ogółem', 'dane jaka jest liczba wynosi przecietna liczba swiadczen emerytalnych?', 'ile wynosi przeciętna liczba świadczeń emerytalnych wypłacanych przez KRUS?', 'jaka jest średnia roczna liczba świadczeń emerytalnych KRUS?']
+2025-10-03 12:58:01,723 [DEBUG] [TIMER] MQ_total | ms=1684
+2025-10-03 12:58:03,671 [DEBUG] dense_search_on | inputs=10 per_k=60 raw=600 uniq=143
+2025-10-03 12:58:03,672 [DEBUG] [TIMER] dense_search_on | ms=1948
+2025-10-03 12:58:04,766 [DEBUG] [TIMER] HyDE_llm | ms=815
+2025-10-03 12:58:04,772 [DEBUG] HyDE_final | n=4 sample=['dataset: - | measure: - | value: <X> | region: ogółem | period: - | typ: -', '<X>Przeciętna liczba świadczeń emerytalnych jest zależna od zmiennych demograficznych i ekonomicznych.', '<X>Wartość ta może wzrastać wraz ze starzeniem się społeczeństwa.']
+2025-10-03 12:58:04,882 [DEBUG] [TIMER] HyDE_total | ms=1207
+2025-10-03 12:58:05,957 [DEBUG] dense_search_on | inputs=4 per_k=60 raw=240 uniq=181
+2025-10-03 12:58:06,011 [DEBUG] [TIMER] dense_search_on | ms=951
+2025-10-03 12:58:06,280 [DEBUG] dense_search | k=100 got=100
+2025-10-03 12:58:06,281 [DEBUG] [TIMER] dense_search | ms=233
+2025-10-03 12:58:06,302 [DEBUG] [TIMER] bm25_invoke | ms=20
+2025-10-03 12:58:06,303 [DEBUG] BM25 | got=100
+2025-10-03 12:58:06,313 [DEBUG] RRF_merge | inputs=[100, 143, 181, 100] out=351
+2025-10-03 13:01:18,973 [DEBUG] [TIMER] CE_predict | ms=192658
+2025-10-03 13:01:18,976 [DEBUG] CE_stats | n=160 mi=0.002748419065028429 ma=0.9168917536735535 mean=0.5274834059513523
+2025-10-03 13:01:18,977 [DEBUG] [TIMER] CE_total | ms=192662
+2025-10-03 13:01:18,977 [DEBUG] AFTER_CE | n=160 above_thr=140 thr=0.06
+2025-10-03 13:01:18,985 [DEBUG] CE_threshold | kept=140 thr=0.06 cand=160
+2025-10-03 13:01:18,986 [DEBUG] FILTER_core_fields | before=140 after=140
+2025-10-03 13:01:18,987 [DEBUG] FILTER_valid_value | before=140 after=120
+2025-10-03 13:01:19,023 [DEBUG] RETRIEVE_DONE | returned=12
+2025-10-03 13:01:19,023 [DEBUG] [TIMER] retrieve_total | ms=199076
+2025-10-03 13:01:19,026 [DEBUG] ANSWER_docs | n=12 head=[('EMERYTURY I RENTY REALIZOWANE PRZEZ KRUS', 'przeciętna miesięczna liczba świadczeniobiorców', '2025-Q1', 'ogółem', 760307.0), ('PRZECIĘTNE MIESIĘCZNE ŚWIADCZENIE EMERYTALNO-RENTOWE WEDŁUG RODZAJÓW ŚWIADCZEŃ', 'Przeciętne świadczenie w zł', '2025-Q1', 'ogółem', 2107.21), ('EMERYTURY I RENTY REALIZOWANE PRZEZ KRUS', 'przeciętne świadczenie w zł', '2025-Q1', 'ogółem', 2184.49)]
+2025-10-03 13:01:19,139 [DEBUG] ANSWER_best | value=722 okres=2025 region=ogółem
+2025-10-03 13:01:19,140 [DEBUG] [TIMER] answer_total | ms=199193
+2025-10-03 13:12:42,270 [DEBUG] CFG | CSV_DIR=./data/all_data.csv LLM_MQ_ENABLED=True MQ_BASE_VARIANTS=4 MQ_LLM_VARIANTS=8 USE_HYDE=True HYDE_BASE=3 HYDE_LLM=3 MIN_CE_FOR_CONTEXT=0.06 RRF_WEIGHTS={'dense_q': 1.0, 'dense_mq': 0.95, 'hyde': 0.7, 'bm25': 1.0} FAST_DATA_MODE=False TAB_CE_MAX=None TAB_RRF_K=160
+2025-10-03 13:12:43,233 [DEBUG] [TIMER] CSV_build:all_data.csv | ms=931
+2025-10-03 13:12:43,234 [DEBUG] DOCS_BUILT | count=2767
+2025-10-03 13:12:43,234 [DEBUG] VOCAB_SIZES | dataset=35 measure=119 region=67 typ=53
+2025-10-03 13:12:43,365 [DEBUG] CHROMA_STAT | vectors=5534
+2025-10-03 13:12:43,447 [DEBUG] BM25_INIT | docs=2767
+2025-10-03 13:12:54,056 [DEBUG] Q | q=dane ile wynosi przeciętna liczba świadczeń emerytalnych?
+2025-10-03 13:12:54,117 [DEBUG] [TIMER] parse_query_fields | ms=60
+2025-10-03 13:12:54,118 [DEBUG] PARSED
+2025-10-03 13:12:54,118 [DEBUG] PREFS | prefer_typ=emerytury force_typ=True force_national=True is_country_query=False
+2025-10-03 13:12:54,182 [DEBUG] MQ_base | n=3 examples=['dane ile wynosi przeciętna liczba świadczeń emerytalnych?', 'dane ile wynosi przeciętna liczba świadczeń emerytalnych? ogółem', 'dane podaj wartość przecietna liczba swiadczen emerytalnych?']
+2025-10-03 13:12:56,194 [DEBUG] [TIMER] MQ_llm | ms=2010
+2025-10-03 13:12:56,195 [DEBUG] MQ_final | n=11 examples=['dane ile wynosi przeciętna liczba świadczeń emerytalnych?', 'dane ile wynosi przeciętna liczba świadczeń emerytalnych? ogółem', 'dane podaj wartość przecietna liczba swiadczen emerytalnych?', 'ile wynosi przeciętna liczba świadczeń emerytalnych wypłacanych przez KRUS?', 'jaka jest średnia roczna liczba świadczeń emerytalnych w systemie KRUS?']
+2025-10-03 13:12:56,196 [DEBUG] [TIMER] MQ_total | ms=2077
+2025-10-03 13:12:58,573 [DEBUG] dense_search_on | inputs=11 per_k=60 raw=660 uniq=157
+2025-10-03 13:12:58,574 [DEBUG] [TIMER] dense_search_on | ms=2377
+2025-10-03 13:12:59,499 [DEBUG] [TIMER] HyDE_llm | ms=853
+2025-10-03 13:12:59,500 [DEBUG] HyDE_final | n=4 sample=['dataset: - | measure: - | value: <X> | region: ogółem | period: - | typ: -', '<X>Przeciętna liczba świadczeń emerytalnych w ogólnym ujęciu rośnie systematycznie.', '<X>Średnia liczba wypłacanych świadczeń emerytalnych zwiększa się wraz z trendem demograficznym.']
+2025-10-03 13:12:59,500 [DEBUG] [TIMER] HyDE_total | ms=925
+2025-10-03 13:13:00,122 [DEBUG] dense_search_on | inputs=4 per_k=60 raw=240 uniq=162
+2025-10-03 13:13:00,123 [DEBUG] [TIMER] dense_search_on | ms=621
+2025-10-03 13:13:00,275 [DEBUG] dense_search | k=100 got=100
+2025-10-03 13:13:00,276 [DEBUG] [TIMER] dense_search | ms=152
+2025-10-03 13:13:00,286 [DEBUG] [TIMER] bm25_invoke | ms=9
+2025-10-03 13:13:00,286 [DEBUG] BM25 | got=100
+2025-10-03 13:13:00,289 [DEBUG] RRF_merge | inputs=[100, 157, 162, 100] out=319
+2025-10-03 13:16:27,503 [DEBUG] [TIMER] CE_predict | ms=207212
+2025-10-03 13:16:27,506 [DEBUG] CE_stats | n=160 mi=0.0033686787355691195 ma=0.9168917536735535 mean=0.5046326571478857
+2025-10-03 13:16:27,507 [DEBUG] [TIMER] CE_total | ms=207217
+2025-10-03 13:16:27,508 [DEBUG] AFTER_CE | n=160 above_thr=136 thr=0.06
+2025-10-03 13:16:27,522 [DEBUG] CE_threshold | kept=136 thr=0.06 cand=160
+2025-10-03 13:16:27,523 [DEBUG] FILTER_core_fields | before=136 after=136
+2025-10-03 13:16:27,525 [DEBUG] FILTER_valid_value | before=136 after=116
+2025-10-03 13:16:27,565 [DEBUG] RETRIEVE_DONE | returned=12
+2025-10-03 13:16:27,567 [DEBUG] [TIMER] retrieve_total | ms=213510
+2025-10-03 13:16:27,571 [DEBUG] ANSWER_docs | n=12 head=[('EMERYTURY I RENTY REALIZOWANE PRZEZ KRUS', 'przeciętna miesięczna liczba świadczeniobiorców', '2025-Q1', 'ogółem', 760307.0), ('EMERYTURY I RENTY REALIZOWANE PRZEZ KRUS', 'przeciętne świadczenie w zł', '2025-Q1', 'ogółem', 2184.49), ('PRZECIĘTNE MIESIĘCZNE ŚWIADCZENIE EMERYTALNO-RENTOWE WEDŁUG RODZAJÓW ŚWIADCZEŃ', 'Przeciętne świadczenie w zł', '2025-Q1', 'ogółem', 2107.21)]
+2025-10-03 13:16:27,739 [DEBUG] ANSWER_best | value=722 okres=2025 region=ogółem
+2025-10-03 13:16:27,741 [DEBUG] [TIMER] answer_total | ms=213684
+2025-10-03 13:17:10,581 [DEBUG] Q | q=dane ile osob podlega ubezpieczeniu zdrowotnemu w kujawsko-pomorskim?
+2025-10-03 13:17:10,622 [DEBUG] [TIMER] parse_query_fields | ms=40
+2025-10-03 13:17:10,622 [DEBUG] PARSED | dataset=liczba osob podlegajacych ubezpieczeniu zdrowotnemu według wojewodztw
+2025-10-03 13:17:10,622 [DEBUG] PREFS | prefer_typ=None force_typ=False force_national=True is_country_query=False
+2025-10-03 13:17:10,670 [DEBUG] MQ_base | n=3 examples=['dane ile osob podlega ubezpieczeniu zdrowotnemu w kujawsko-pomorskim? ogółem', 'dane jaka jest liczba osob podlega ubezpieczeniu zdrowotnemu w kujawsko-pomorskim?', 'dane ile osob podlega ubezpieczeniu zdrowotnemu w kujawsko-pomorskim?']
+2025-10-03 13:17:15,001 [DEBUG] [TIMER] MQ_llm | ms=4321
+2025-10-03 13:17:15,002 [DEBUG] MQ_final | n=10 examples=['dane ile osob podlega ubezpieczeniu zdrowotnemu w kujawsko-pomorskim? ogółem', 'dane jaka jest liczba osob podlega ubezpieczeniu zdrowotnemu w kujawsko-pomorskim?', 'dane ile osob podlega ubezpieczeniu zdrowotnemu w kujawsko-pomorskim?', 'liczba osób podlegających ubezpieczeniu zdrowotnemu w województwie kujawsko-pomorskim', 'ile osób jest ubezpieczonych zdrowotnie w KRUS w województwie kujawsko-pomorskim']
+2025-10-03 13:17:15,003 [DEBUG] [TIMER] MQ_total | ms=4381
+2025-10-03 13:17:17,166 [DEBUG] dense_search_on | inputs=10 per_k=60 raw=600 uniq=154
+2025-10-03 13:17:17,166 [DEBUG] [TIMER] dense_search_on | ms=2162
+2025-10-03 13:17:18,088 [DEBUG] [TIMER] HyDE_llm | ms=866
+2025-10-03 13:17:18,090 [DEBUG] HyDE_final | n=6 sample=['dataset: liczba osob podlegajacych ubezpieczeniu zdrowotnemu według wojewodztw | measure: - | value: <X> | region: ogółem | period: - | typ: -', 'dataset: liczba ubezpieczonych według wojewodztw | measure: - | value: <X> | region: ogółem | period: - | typ: -', 'dataset: decyzje o podleganiu i ustaniu ubezpieczenia społecznego rolnikow według wojewodztw | measure: - | value: <X> | region: ogółem | period: - | typ: -']
+2025-10-03 13:17:18,091 [DEBUG] [TIMER] HyDE_total | ms=922
+2025-10-03 13:17:19,161 [DEBUG] dense_search_on | inputs=6 per_k=60 raw=360 uniq=207
+2025-10-03 13:17:19,161 [DEBUG] [TIMER] dense_search_on | ms=1069
+2025-10-03 13:17:19,305 [DEBUG] dense_search | k=100 got=100
+2025-10-03 13:17:19,306 [DEBUG] [TIMER] dense_search | ms=143
+2025-10-03 13:17:19,314 [DEBUG] [TIMER] bm25_invoke | ms=8
+2025-10-03 13:17:19,314 [DEBUG] BM25 | got=100
+2025-10-03 13:17:19,317 [DEBUG] RRF_merge | inputs=[100, 154, 207, 100] out=339
+2025-10-03 13:20:41,057 [DEBUG] [TIMER] CE_predict | ms=201738
+2025-10-03 13:20:41,067 [DEBUG] CE_stats | n=160 mi=5.46308328921441e-05 ma=0.9932456612586975 mean=0.21597126749941253
+2025-10-03 13:20:41,071 [DEBUG] [TIMER] CE_total | ms=201753
+2025-10-03 13:20:41,075 [DEBUG] AFTER_CE | n=160 above_thr=99 thr=0.06
+2025-10-03 13:20:41,093 [DEBUG] CE_threshold | kept=99 thr=0.06 cand=160
+2025-10-03 13:20:41,095 [DEBUG] FILTER_core_fields | before=99 after=99
+2025-10-03 13:20:41,098 [DEBUG] FILTER_valid_value | before=99 after=99
+2025-10-03 13:20:41,136 [DEBUG] RETRIEVE_DONE | returned=5
+2025-10-03 13:20:41,138 [DEBUG] [TIMER] retrieve_total | ms=210555
+2025-10-03 13:20:41,143 [DEBUG] ANSWER_docs | n=5 head=[('LICZBA OSÓB PODLEGAJĄCYCH UBEZPIECZENIU ZDROWOTNEMU WEDŁUG WOJEWÓDZTW', 'liczba osób', '2025', 'Ogółem', 1929877.0), ('LICZBA OSÓB PODLEGAJĄCYCH UBEZPIECZENIU ZDROWOTNEMU WEDŁUG WOJEWÓDZTW', 'pomocnicy rolników', '2025', 'Ogółem', 4779.0), ('LICZBA OSÓB PODLEGAJĄCYCH UBEZPIECZENIU ZDROWOTNEMU WEDŁUG WOJEWÓDZTW', 'członkowie rodzin emerytów i rencistów', '2025', 'Ogółem', 26850.0)]
+2025-10-03 13:20:41,408 [DEBUG] ANSWER_best | value=1 929 877 okres=2025 region=Ogółem
+2025-10-03 13:20:41,409 [DEBUG] [TIMER] answer_total | ms=210827
+2025-10-03 13:22:28,026 [DEBUG] CFG | CSV_DIR=./data/all_data.csv LLM_MQ_ENABLED=True MQ_BASE_VARIANTS=4 MQ_LLM_VARIANTS=8 USE_HYDE=True HYDE_BASE=3 HYDE_LLM=3 MIN_CE_FOR_CONTEXT=0.06 RRF_WEIGHTS={'dense_q': 1.0, 'dense_mq': 0.95, 'hyde': 0.7, 'bm25': 1.0} FAST_DATA_MODE=False TAB_CE_MAX=None TAB_RRF_K=160
+2025-10-03 13:22:29,109 [DEBUG] [TIMER] CSV_build:all_data.csv | ms=1034
+2025-10-03 13:22:29,110 [DEBUG] DOCS_BUILT | count=2767
+2025-10-03 13:22:29,111 [DEBUG] VOCAB_SIZES | dataset=35 measure=119 region=67 typ=53
+2025-10-03 13:22:29,293 [DEBUG] CHROMA_STAT | vectors=5534
+2025-10-03 13:22:29,460 [DEBUG] BM25_INIT | docs=2767
+2025-10-03 13:22:38,862 [DEBUG] Q | q=dane ile wynosi przeciętna liczba świadczeń emerytalnych?
+2025-10-03 13:22:38,920 [DEBUG] [TIMER] parse_query_fields | ms=57
+2025-10-03 13:22:38,920 [DEBUG] PARSED
+2025-10-03 13:22:38,921 [DEBUG] PREFS | prefer_typ=emerytury force_typ=True force_national=True is_country_query=False
+2025-10-03 13:22:38,976 [DEBUG] MQ_base | n=4 examples=['dane jaka jest liczba wynosi przecietna liczba swiadczen emerytalnych?', 'dane ile wynosi przeciętna liczba świadczeń emerytalnych?', 'dane ile wynosi przeciętna liczba świadczeń emerytalnych? ogółem']
+2025-10-03 13:22:40,556 [DEBUG] [TIMER] MQ_llm | ms=1579
+2025-10-03 13:22:40,557 [DEBUG] MQ_final | n=11 examples=['dane jaka jest liczba wynosi przecietna liczba swiadczen emerytalnych?', 'dane ile wynosi przeciętna liczba świadczeń emerytalnych?', 'dane ile wynosi przeciętna liczba świadczeń emerytalnych? ogółem', 'dane podaj wartość przecietna liczba swiadczen emerytalnych?', 'ile wynosi przeciętna liczba świadczeń emerytalnych wypłacanych przez KRUS?']
+2025-10-03 13:22:40,557 [DEBUG] [TIMER] MQ_total | ms=1636
+2025-10-03 13:22:42,173 [DEBUG] dense_search_on | inputs=11 per_k=60 raw=660 uniq=142
+2025-10-03 13:22:42,174 [DEBUG] [TIMER] dense_search_on | ms=1616
+2025-10-03 13:22:43,207 [DEBUG] [TIMER] HyDE_llm | ms=959
+2025-10-03 13:22:43,208 [DEBUG] HyDE_final | n=4 sample=['dataset: - | measure: - | value: <X> | region: ogółem | period: - | typ: -', '<X>Przeciętna liczba świadczeń emerytalnych jest zależna od zmian demograficznych i polityki społecznej.', '<X>Wartość ta może się różnić w zależności od okresu analizy i specyfiki systemu ubezpieczeń rolniczych.']
+2025-10-03 13:22:43,209 [DEBUG] [TIMER] HyDE_total | ms=1033
+2025-10-03 13:22:43,792 [DEBUG] dense_search_on | inputs=4 per_k=60 raw=240 uniq=211
+2025-10-03 13:22:43,792 [DEBUG] [TIMER] dense_search_on | ms=583
+2025-10-03 13:22:43,921 [DEBUG] dense_search | k=100 got=100
+2025-10-03 13:22:43,921 [DEBUG] [TIMER] dense_search | ms=128
+2025-10-03 13:22:43,930 [DEBUG] [TIMER] bm25_invoke | ms=8
+2025-10-03 13:22:43,930 [DEBUG] BM25 | got=100
+2025-10-03 13:22:43,934 [DEBUG] RRF_merge | inputs=[100, 142, 211, 100] out=367
+2025-10-03 13:25:25,740 [DEBUG] [TIMER] CE_predict | ms=161805
+2025-10-03 13:25:25,743 [DEBUG] CE_stats | n=160 mi=0.0033686787355691195 ma=0.9168917536735535 mean=0.5297368791958433
+2025-10-03 13:25:25,745 [DEBUG] [TIMER] CE_total | ms=161809
+2025-10-03 13:25:25,746 [DEBUG] AFTER_CE | n=160 above_thr=142 thr=0.06
+2025-10-03 13:25:25,761 [DEBUG] CE_threshold | kept=142 thr=0.06 cand=160
+2025-10-03 13:25:25,762 [DEBUG] FILTER_core_fields | before=142 after=142
+2025-10-03 13:25:25,764 [DEBUG] FILTER_valid_value | before=142 after=122
+2025-10-03 13:25:25,830 [DEBUG] RETRIEVE_DONE | returned=12
+2025-10-03 13:25:25,831 [DEBUG] [TIMER] retrieve_total | ms=166968
+2025-10-03 13:25:25,834 [DEBUG] ANSWER_docs | n=12 head=[('PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ', 'przeciętna miesięczna liczba świadczeń', '2025', 'MSWiA', 265.0), ('PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ', 'przeciętna miesięczna liczba świadczeń', '2025', 'MON', 61.0), ('PRZECIĘTNA MIESIĘCZNA LICZBA EMERYTUR I RENT WEDŁUG WOJEWÓDZTW ORAZ ŚWIADCZEŃ', 'przeciętna miesięczna liczba świadczeń', '2025', 'ogółem', 758857.0)]
+2025-10-03 13:25:25,963 [DEBUG] ANSWER_best | value=265 okres=2025 region=MSWiA
+2025-10-03 13:25:25,964 [DEBUG] [TIMER] answer_total | ms=167101
+2025-10-03 13:25:43,411 [DEBUG] Q | q=dane ile osob podlega ubezpieczeniu zdrowotnemu w kujawsko-pomorskim?
+2025-10-03 13:25:43,471 [DEBUG] [TIMER] parse_query_fields | ms=59
+2025-10-03 13:25:43,472 [DEBUG] PARSED | dataset=liczba osob podlegajacych ubezpieczeniu zdrowotnemu według wojewodztw region=kujawsko-pomorskie
+2025-10-03 13:25:43,472 [DEBUG] PREFS | prefer_typ=None force_typ=False force_national=True is_country_query=False
+2025-10-03 13:25:43,519 [DEBUG] MQ_base | n=3 examples=['dane ile osob podlega ubezpieczeniu zdrowotnemu w kujawsko-pomorskim?', 'dane ile osob podlega ubezpieczeniu zdrowotnemu w kujawsko-pomorskim? ogółem', 'dane jaka jest liczba osob podlega ubezpieczeniu zdrowotnemu w kujawsko-pomorskim?']
+2025-10-03 13:25:47,661 [DEBUG] [TIMER] MQ_llm | ms=4125
+2025-10-03 13:25:47,662 [DEBUG] MQ_final | n=10 examples=['dane ile osob podlega ubezpieczeniu zdrowotnemu w kujawsko-pomorskim?', 'dane ile osob podlega ubezpieczeniu zdrowotnemu w kujawsko-pomorskim? ogółem', 'dane jaka jest liczba osob podlega ubezpieczeniu zdrowotnemu w kujawsko-pomorskim?', 'liczba osób podlegających ubezpieczeniu zdrowotnemu w województwie kujawsko-pomorskim', 'ile osób jest objętych ubezpieczeniem zdrowotnym w KRUS w regionie kujawsko-pomorskim']
+2025-10-03 13:25:47,662 [DEBUG] [TIMER] MQ_total | ms=4189
+2025-10-03 13:25:49,078 [DEBUG] dense_search_on | inputs=10 per_k=60 raw=600 uniq=178
+2025-10-03 13:25:49,078 [DEBUG] [TIMER] dense_search_on | ms=1415
+2025-10-03 13:25:50,206 [DEBUG] [TIMER] HyDE_llm | ms=1060
+2025-10-03 13:25:50,208 [DEBUG] HyDE_final | n=6 sample=['dataset: liczba osob podlegajacych ubezpieczeniu zdrowotnemu według wojewodztw | measure: - | value: <X> | region: kujawsko-pomorskie | period: - | typ: -', 'dataset: liczba ubezpieczonych według wojewodztw | measure: - | value: <X> | region: kujawsko-pomorskie | period: - | typ: -', 'dataset: decyzje o podleganiu i ustaniu ubezpieczenia społecznego rolnikow według wojewodztw | measure: - | value: <X> | region: kujawsko-pomorskie | period: - | typ: -']
+2025-10-03 13:25:50,210 [DEBUG] [TIMER] HyDE_total | ms=1129
+2025-10-03 13:25:51,028 [DEBUG] dense_search_on | inputs=6 per_k=60 raw=360 uniq=142
+2025-10-03 13:25:51,028 [DEBUG] [TIMER] dense_search_on | ms=818
+2025-10-03 13:25:51,162 [DEBUG] dense_search | k=100 got=100
+2025-10-03 13:25:51,162 [DEBUG] [TIMER] dense_search | ms=133
+2025-10-03 13:25:51,169 [DEBUG] [TIMER] bm25_invoke | ms=6
+2025-10-03 13:25:51,169 [DEBUG] BM25 | got=100
+2025-10-03 13:25:51,172 [DEBUG] RRF_merge | inputs=[100, 178, 142, 100] out=328
+2025-10-03 13:29:31,591 [DEBUG] [TIMER] CE_predict | ms=220418
+2025-10-03 13:29:31,595 [DEBUG] CE_stats | n=160 mi=5.46308328921441e-05 ma=0.9932456612586975 mean=0.20747259582606148
+2025-10-03 13:29:31,596 [DEBUG] [TIMER] CE_total | ms=220422
+2025-10-03 13:29:31,597 [DEBUG] AFTER_CE | n=160 above_thr=85 thr=0.06
+2025-10-03 13:29:31,610 [DEBUG] CE_threshold | kept=85 thr=0.06 cand=160
+2025-10-03 13:29:31,611 [DEBUG] FILTER_core_fields | before=85 after=85
+2025-10-03 13:29:31,613 [DEBUG] FILTER_valid_value | before=85 after=85
+2025-10-03 13:29:31,649 [DEBUG] RETRIEVE_DONE | returned=12
+2025-10-03 13:29:31,650 [DEBUG] [TIMER] retrieve_total | ms=228237
+2025-10-03 13:29:31,653 [DEBUG] ANSWER_docs | n=12 head=[('LICZBA OSÓB PODLEGAJĄCYCH UBEZPIECZENIU ZDROWOTNEMU WEDŁUG WOJEWÓDZTW', 'liczba osób', '2025', 'kujawsko-pomorskie', 116896.0), ('LICZBA OSÓB PODLEGAJĄCYCH UBEZPIECZENIU ZDROWOTNEMU WEDŁUG WOJEWÓDZTW', 'emeryci i renciści', '2025', 'kujawsko-pomorskie', 66577.0), ('LICZBA OSÓB PODLEGAJĄCYCH UBEZPIECZENIU ZDROWOTNEMU WEDŁUG WOJEWÓDZTW', 'pomocnicy rolników', '2025', 'kujawsko-pomorskie', 124.0)]
+2025-10-03 13:29:31,830 [DEBUG] ANSWER_best | value=116 896 okres=2025 region=kujawsko-pomorskie
+2025-10-03 13:29:31,831 [DEBUG] [TIMER] answer_total | ms=228419

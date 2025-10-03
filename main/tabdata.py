@@ -895,7 +895,9 @@ def retrieve(query: str, k_final: int = 24) -> List[Document]:
         prefs = derive_preferences(query, parsed)
         dbg("PARSED", **{k: v for k, v in parsed.items() if v})
         dbg("PREFS", **prefs)
-
+        
+        if parsed.get("region") is None:
+            parsed["region"] = "ogółem"
         # Dense & MQ
         d1 = []
         if LLM_MQ_ENABLED:
@@ -984,20 +986,25 @@ def retrieve(query: str, k_final: int = 24) -> List[Document]:
         # Filtry po okresie/regionie
         req_period = parsed.get("period")
         if req_period:
-            req_pn = norm_period(req_period)
+            req_pn = norm_period(req_period) 
             if req_pn and re.fullmatch(r"20\d{2}", req_pn):
                 def _year_of(p: Optional[str]) -> Optional[str]:
                     ps = norm_period(p)
-                    if not ps: return None
-                    m = re.match(r"^(20\d{2})", ps)
+                    if not ps:
+                        return None
+                    m = re.match(r"^(20\d{2})", ps)  
                     return m.group(1) if m else None
-                cand_pairs = [(d, ce) for (d, ce) in cand_pairs if _year_of((d.metadata or {}).get(F_OKRES)) == req_pn]
-                if not cand_pairs:
-                    return []
+
+                cand_p = [(d, adj) for (d, adj) in cand_pairs
+                        if _year_of((d.metadata or {}).get("okres")) == req_pn]
             else:
-                cand_pairs = [(d, ce) for (d, ce) in cand_pairs if norm_period((d.metadata or {}).get(F_OKRES)) == req_pn]
-                if not cand_pairs:
-                    return []
+                cand_p = [(d, adj) for (d, adj) in cand_pairs
+                        if norm_period((d.metadata or {}).get("okres")) == req_pn]
+
+            if cand_p:
+                cand_pairs = cand_p
+            else:
+                return []
 
         if prefs.get("is_country_query") and parsed.get("region"):
             want_country = parsed["region"]
@@ -1007,8 +1014,10 @@ def retrieve(query: str, k_final: int = 24) -> List[Document]:
 
         req_region = parsed.get("region")
         if req_region:
-            cand_pairs = [(d, ce) for (d, ce) in cand_pairs if _region_matches(req_region, (d.metadata or {}).get(F_REGION))]
-            if not cand_pairs:
+            cand_r = [(d, ce) for (d, ce) in cand_pairs if _region_matches(req_region, (d.metadata or {}).get("region"))]
+            if cand_r:
+                cand_pairs = cand_r
+            else:
                 return []
 
         if prefs.get("force_national") and not prefs.get("is_country_query"):

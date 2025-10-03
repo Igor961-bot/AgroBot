@@ -12,7 +12,7 @@ from data_schema import (
 )
 
 # ===================== KONFIG / ENV =====================
-CSV_DIR: str = os.getenv("CSV_DIR", "./data/all_data.csv")
+CSV_DIR: str = os.getenv("CSV_DIR", ".data/all_data.csv")
 
 # Włączniki dla modułu danych
 LLM_MQ_ENABLED = True           # MultiQuery przez LLM

@@ -27,7 +27,8 @@ from .common import (
     CSV_DIR, LLM_MQ_ENABLED, MQ_BASE_VARIANTS, MQ_LLM_VARIANTS, USE_HYDE,
     HYDE_VARIANTS_BASE, HYDE_VARIANTS_LLM, HYDE_STRIP_NUMBERS, RRF_WEIGHTS,
     MIN_CE_FOR_CONTEXT, TAB_CE_MAX, TAB_RRF_K,_add_to_vocab,
-    _is_national, _soft_match, _ratio, USE_LLM, _query_mentions_foreign, _dataset_is_foreign
+    _is_national, _soft_match, _ratio, USE_LLM, _query_mentions_foreign, _dataset_is_foreign,
+    _is_special_internal_region 
 )
 from .transform import period_key, pick_latest_per_cluster
 
@@ -505,7 +506,7 @@ def retrieve(query: str, k_final: int = 24) -> List[Document]:
         prefs = derive_preferences(query, parsed)
         dbg("PARSED", **{k: v for k, v in parsed.items() if v})
         dbg("PREFS", **prefs)
-
+        
         # Dense & MQ
         d1 = []
         if LLM_MQ_ENABLED:
@@ -549,6 +550,10 @@ def retrieve(query: str, k_final: int = 24) -> List[Document]:
 
         # Wstępny kandydat set (po progu CE)
         cand = docs_scored
+        
+        if not re.search(r"\b(mswia|mon|msz|ms)\b", norm_text(query)):
+            cand = [(d, s) for (d, s) in cand
+                    if not _is_special_internal_region((d.metadata or {}).get(F_REGION))]
 
         # Odrzuć UE/EFTA/transfery gdy pytanie nie sugeruje zagranicy
         if not _query_mentions_foreign(query):
