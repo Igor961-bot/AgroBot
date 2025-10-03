@@ -5,13 +5,14 @@ Krus chatbot to interaktywny asystent dla rolników oraz instytucji (ustawy + da
 * **Dwa tryby odpowiedzi**:
   * **Ustawa** – odpowiedzi z przypisanymi cytatami/artykułami;
   * **Dane** – szybkie zwroty danych tabelarycznych.
+* **Front + Backend**:
+  * Frontend w React.
+  * Backend w Python/FastAPI.
 ---
 Przełączanie pomiędzy modułami aktualnie odbywa się w następujący sposób:
 **Dane** należy w zapytaniu użytkownika podać jedno ze słów klucz *dane*, *statystyki*, *statystycznie*, wtedy zostanie użyty moduł do zapytań tabelarycznych.
 Tryb **ustawy** jest domyślnym trybem i nie trzeba wpisywać słów klucz aby go obsługiwać.   
-* **Front + Backend**:
-  * Frontend w React.
-  * Backend w Python/FastAPI.
+
 ## Opis repozytorium
 * `data/` - folder w którym znajdują się pliki do budowy dwóch instancji chroma 
 * `logi/`- - folder do przytrzymywania wyników 
