@@ -1,24 +1,25 @@
 # KRUS chatbot
-Krus chatbot to interaktywny asystent dla rolników oraz instytucji, odpowiadający na podstawie ustawy o ubezpieczeniu społecznym rolników z roku 1990, oraz statystycznych danych dabelarycznych. Projekt łączy LLM obsługujący język polski, RAG (wektorowy i BM25), ekstrakcję danych tabelarycznych oraz webowy interfejs czatowy.
+Krus chatbot to interaktywny asystent dla rolników oraz instytucji, odpowiadający na podstawie ustawy o ubezpieczeniu społecznym rolników z roku 1990, oraz statystycznych danych dabelarycznych. Projekt łączy LLM obsługujący język polski (Bielik), RAG (wektorowy i BM25), ekstrakcję danych tabelarycznych oraz webowy interfejs czatowy.
 ## Założenia projektu
 * **RAG hybrydowy**: ChromaDB + BM25/Cross-encodery do rerankingu.
 * **Dwa tryby odpowiedzi**:
   * **Ustawa** – odpowiedzi z przypisanymi cytatami/artykułami.
-  * **Dane** – szybkie zwroty danych tabelarycznych.
-* **Front + Backend**:
+    * **Odpowiedzi formułowane przez polski model językowy**: `speakleash/Bielik` 
+  * **Dane** – szybkie zwroty najbardziej pasujących do zapytania użytkownika danych tabelarycznych.
+* **Webowy interface chatowy**:
   * Frontend w React.
   * Backend w Python/FastAPI.
 ---
-### Przełączanie pomiędzy modułami aktualnie odbywa się w następujący sposób:
+**Przełączanie pomiędzy modułami aktualnie odbywa się w następujący sposób:** 
 **Dane** należy w zapytaniu użytkownika podać jedno ze słów klucz *dane*, *statystyki*, *statystycznie*, wtedy zostanie użyty moduł do zapytań tabelarycznych.
 Tryb **ustawy** jest domyślnym trybem i nie trzeba wpisywać słów klucz aby go obsługiwać.   
 
 ## Opis repozytorium
 * `data/` - folder w którym znajdują się pliki do budowy dwóch instancji chroma 
-* `logi/` - folder do przytrzymywania wyników 
+* `logi/` - folder z zebranymi wynikami 
 * `test/` - folder do plików testowych 
 * `requirements.txt` - plik instalacyjny
-* `main/` — kod aplikacji:**
+* `main/` — kod aplikacji:
     * `.env` – zmienne środowiskowe (ścieżki, modele, porty).
     * `ask.py` – plik wywołania chatbota w **CLI**.
     * `build_chroma.py` – **budowa Chromy** (ustawy oraz CSV).
@@ -35,7 +36,7 @@ Tryb **ustawy** jest domyślnym trybem i nie trzeba wpisywać słów klucz aby g
         * `transform.py` – pomocnicze (sortowanie okresów, wybór najświeższych).
 
 ## Uruchamianie aplikacji 
-W terminalu w folderze *Agrobot* należy uruchomić komendę `pip install -r requirements.txt`. Jeśli jeszcze w folderze nie znajdują się dwa foldery: *chroma_ustawa* oraz *chroma_statystyki* należy uruchomić plik `build_chroma.py`. 
+W terminalu w folderze *Agrobot* należy uruchomić komendę `pip install -r requirements.txt`. Jeśli w folderze jeszcze nie znajdują się dwa foldery: *chroma_ustawa* oraz *chroma_statystyki* należy uruchomić plik `build_chroma.py` aby zbudować kolekcje. 
 ### Uruchamiania poprzez CLI
 Należy przejść do pliku `ask.py` który trzeba wywołać. Po załadowaniu, można w konsoli zadawać pytania. Jeśli wybrany tryb to odpowiedź na temat ustawy, po zadaniu pierwszego pytania należy postępować zgodnie z instrukcją wyświetloną w terminalu aby użyć trybu `follow_up`, który sprawia, że użytkownik może zadać dopytywać w odniesieniu o poprzednie pytanie. 
 ### Uruchamianie frontendu oraz backendu
