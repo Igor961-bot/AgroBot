@@ -1,5 +1,4 @@
 # KRUS chatbot
----
 Krus chatbot to interaktywny asystent dla rolników oraz instytucji, odpowiadający na podstawie ustawy o ubezpieczeniu społecznym rolników z roku 1990, oraz statystycznych danych dabelarycznych. Projekt łączy LLM obsługujący język polski (Bielik), RAG (wektorowy i BM25), ekstrakcję danych tabelarycznych oraz webowy interfejs czatowy.
 ## Założenia projektu
 * **RAG hybrydowy**: ChromaDB + BM25/Cross-encodery do rerankingu.
