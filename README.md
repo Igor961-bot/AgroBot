@@ -13,7 +13,7 @@ Krus chatbot to interaktywny asystent dla rolników oraz instytucji, odpowiadaj�
 **Przełączanie pomiędzy modułami aktualnie odbywa się w następujący sposób:** 
 **Dane** należy w zapytaniu użytkownika podać jedno ze słów klucz *dane*, *statystyki*, *statystycznie*, wtedy zostanie użyty moduł do zapytań tabelarycznych.
 Tryb **ustawy** jest domyślnym trybem i nie trzeba wpisywać słów klucz aby go obsługiwać.   
-
+---
 ## Opis repozytorium
 * `data/` - folder w którym znajdują się pliki do budowy dwóch instancji chroma 
 * `logi/` - folder z zebranymi wynikami 
@@ -34,7 +34,7 @@ Tryb **ustawy** jest domyślnym trybem i nie trzeba wpisywać słów klucz aby g
         * `format.py` – formatowanie odpowiedzi i tabel ze źródłami.
         * `interact.py` – funkcja `answer(question)` — punkt użycia trybu DANE.
         * `transform.py` – pomocnicze (sortowanie okresów, wybór najświeższych).
-
+---
 ## Uruchamianie aplikacji 
 W terminalu w folderze *Agrobot* należy uruchomić komendę `pip install -r requirements.txt`. Jeśli w folderze jeszcze nie znajdują się dwa foldery: *chroma_ustawa* oraz *chroma_statystyki* należy uruchomić plik `build_chroma.py` aby zbudować kolekcje. 
 ### Uruchamiania poprzez CLI
