@@ -350,17 +350,18 @@ memory = ConversationBufferWindowMemory(
     k=3, memory_key="chat_history", return_messages=True, output_key="answer"
 )
 
-LLM_BASE_URL = os.getenv("LLM_BASE_URL", "http://127.0.0.1:1234/v1").rstrip("/")
-LMSTUDIO_API_KEY = os.getenv("LMSTUDIO_API_KEY", "lm-studio")
-LLM_MODEL_ID = os.getenv("LLM_MODEL_ID", "bielik-11b-v2.6-instruct")
+BIELIK_BASE_URL = os.getenv("BIELIK_BASE_URL").rstrip("/")
+BIELIK_API_KEY  = os.getenv("BIELIK_API_KEY", "dummy")
+BIELIK_MODEL_ID = os.getenv("BIELIK_MODEL_ID", "speakleash/Bielik-11B-v2.6-Instruct")
 
 llm = ChatOpenAI(
-    model=LLM_MODEL_ID,
-    base_url=LLM_BASE_URL,
-    api_key=LMSTUDIO_API_KEY,
+    model=BIELIK_MODEL_ID,
+    base_url=BIELIK_BASE_URL,
+    api_key=Bielik_API_KEY if (Bielik_API_KEY := BIELIK_API_KEY) else "dummy",
     temperature=0.35,
     max_tokens=512,
 )
+
 
 prompt_base = PromptTemplate(
     input_variables=["context", "question"],

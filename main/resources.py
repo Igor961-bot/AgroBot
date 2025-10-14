@@ -1,212 +1,252 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
-import os
-from typing import List, Optional, Tuple
-
+import os, time
+from typing import List, Optional, Tuple, Dict, Any
 import numpy as np
-import torch
+import requests
 from dotenv import load_dotenv
 load_dotenv()
 
-# --- ENV ---
-USE_LMSTUDIO: bool = os.getenv("USE_LMSTUDIO", "1").lower() in ("1","true","yes")
-LLM_BASE_URL: str = os.getenv("LLM_BASE_URL", "http://127.0.0.1:1234/v1").rstrip("/")
-LMSTUDIO_API_KEY: str = os.getenv("LMSTUDIO_API_KEY", "lm-studio")
-
+# ===== ENV (zachowujemy nazwy używane w reszcie projektu) =====
 EMBEDDER_MODEL_T: Optional[str] = os.getenv("EMBEDDER_MODEL_T")
 EMBEDDER_MODEL_U: Optional[str] = os.getenv("EMBEDDER_MODEL_U")
+RERANKER_MODEL_T: Optional[str] = os.getenv("RERANKER_MODEL_T")
+RERANKER_MODEL_U: Optional[str] = os.getenv("RERANKER_MODEL_U")
 
-RERANKER_MODEL_T: Optional[str] = os.getenv("RERANKER_MODEL_T")  # np. BAAI/bge-reranker-v2-m3
-RERANKER_MODEL_U: Optional[str] = os.getenv("RERANKER_MODEL_U")  # np. radlab/polish-cross-encoder
-
-PERSIST_DIR: str  = os.getenv("PERSIST_DIR",  "./chroma_statystyki")
+PERSIST_DIR:  str = os.getenv("PERSIST_DIR",  "./chroma_statystyki")
 PERSIST_PATH: str = os.getenv("PERSIST_PATH", "./chroma_ustawa")
 
-# Możesz wyłączyć ONNX CE na Windows (eliminuje PermissionError na temp .onnx_data)
-USE_ONNX_CE = 0
+# OpenShift endpoints
+BIELIK_BASE_URL: str = os.getenv("BIELIK_BASE_URL", "").rstrip("/")
+BIELIK_MODEL_ID: str = os.getenv("BIELIK_MODEL_ID", "speakleash/Bielik-11B-v2.6-Instruct")
+BIELIK_API_KEY: str = os.getenv("BIELIK_API_KEY", "dummy")
 
-# --- LM Studio clienty (tylko embeddings potrzeba tutaj) ---
-# --- LM Studio client (długie timeouty, bez keep-alive, bez przycinania treści) ---
-import httpx
-from openai import OpenAI
-import os
+E5_BASE_URL: str = os.getenv("E5_BASE_URL", "").rstrip("/")
+E5_API_KEY: str = os.getenv("E5_API_KEY", "dummy")
 
-_EMBED_CONNECT_S = float(os.getenv("EMBED_CONNECT_TIMEOUT_S", "5"))
-_EMBED_READ_S    = float(os.getenv("EMBED_READ_TIMEOUT_S",  "300"))  # spokojnie nawet 300s
-_EMBED_WRITE_S   = float(os.getenv("EMBED_WRITE_TIMEOUT_S", "300"))
+BGE_BASE_URL: str = os.getenv("BGE_BASE_URL", "").rstrip("/")
+BGE_API_KEY: str = os.getenv("BGE_API_KEY", "dummy")
+RADLAB_BASE_URL: str = os.getenv("RADLAB_BASE_URL", "").rstrip("/")
+RADLAB_API_KEY: str = os.getenv("RADLAB_API_KEY", "dummy")
 
-_httpx_client = httpx.Client(
-    timeout=httpx.Timeout(connect=_EMBED_CONNECT_S, read=_EMBED_READ_S, write=_EMBED_WRITE_S, pool=None),
-    limits=httpx.Limits(max_keepalive_connections=0, max_connections=5), 
-    headers={
-        "Connection": "close",         
-        "Accept-Encoding": "gzip",      
-    },
-)
+# Batching / timeouty (zostają)
+_EMBED_BATCH_ITEMS      = int(os.getenv("EMBED_BATCH", "64"))
+_EMBED_MAX_TOTAL_CHARS  = int(os.getenv("EMBED_MAX_TOTAL_CHARS", "50000"))
+_EMBED_CONNECT_S        = float(os.getenv("EMBED_CONNECT_TIMEOUT_S", "5"))
+_EMBED_READ_S           = float(os.getenv("EMBED_READ_TIMEOUT_S",  "300"))
+_EMBED_WRITE_S          = float(os.getenv("EMBED_WRITE_TIMEOUT_S", "300"))
 
-_client_embed = OpenAI(
-    base_url=LLM_BASE_URL,
-    api_key=LMSTUDIO_API_KEY,
-    http_client=_httpx_client,
-)
+# ====== Helpers ======
+def _headers(key: str) -> Dict[str, str]:
+    return {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
 
-# --- Embeddings (LM Studio + fallback) ---
-from langchain_core.embeddings import Embeddings
+def _post(url: str, headers: Dict[str, str], payload: Dict[str, Any]) -> Dict[str, Any]:
+    r = requests.post(url, json=payload, headers=headers,
+                      timeout=(_EMBED_CONNECT_S, max(_EMBED_READ_S, _EMBED_WRITE_S)))
+    r.raise_for_status()
+    return r.json()
 
-import time
-from typing import List
-from langchain_core.embeddings import Embeddings
-
-# Sterowanie wyłącznie batchingiem (brak jakiegokolwiek cięcia treści):
-_EMBED_BATCH_ITEMS      = int(os.getenv("EMBED_BATCH", "8"))             # max elementów w jednym żądaniu
-_EMBED_MAX_TOTAL_CHARS  = int(os.getenv("EMBED_MAX_TOTAL_CHARS", "50000"))  # max łączna liczba znaków w żądaniu
-_EMBED_RETRIES          = int(os.getenv("EMBED_RETRIES", "4"))
+def _normalize_e5_model_id(name: str) -> str:
+    # pozwala zostawić starą nazwę 'text-embedding-intfloat-multilingual-e5-large-instruct'
+    if name and "intfloat-multilingual-e5-large-instruct" in name:
+        return "intfloat/multilingual-e5-large-instruct"
+    return name
 
 def _chunk_by_payload(texts: List[str]) -> List[List[str]]:
-    """Dzielenie na sub-batche wg: limit elementów i łącznego rozmiaru znaków (bez obcinania)."""
     out, cur, cur_len = [], [], 0
     for t in texts:
-        t_len = len(t)
-        # jeśli dodanie t przekroczy limit elementów lub łącznej długości → zamknij bieżący batch
-        if cur and (len(cur) + 1 > _EMBED_BATCH_ITEMS or cur_len + t_len > _EMBED_MAX_TOTAL_CHARS):
-            out.append(cur)
-            cur, cur_len = [t], t_len
+        tl = len(t)
+        if cur and (len(cur)+1 > _EMBED_BATCH_ITEMS or cur_len + tl > _EMBED_MAX_TOTAL_CHARS):
+            out.append(cur); cur, cur_len = [t], tl
         else:
-            cur.append(t); cur_len += t_len
-    if cur:
-        out.append(cur)
+            cur.append(t); cur_len += tl
+    if cur: out.append(cur)
     return out
 
-class LMStudioEmbeddings(Embeddings):
-    """Brak przycinania. E5 dostaje prefix query/passage, a wysyłka dzielona na bezpieczne porcje."""
-    def __init__(self, model: str, batch_size: int = None):
-        self.model = model
-        self.batch_size = batch_size or _EMBED_BATCH_ITEMS  # kompatybilność, realnie dzieli _chunk_by_payload
+# ====== Bielik – prosty klient chat/completions (używaj jeśli potrzebujesz) ======
+def llm_chat(messages: List[Dict[str, str]], temperature: float = 0.2, max_tokens: int = 512) -> str:
+    url = f"{BIELIK_BASE_URL}/chat/completions"
+    payload = {"model": BIELIK_MODEL_ID, "messages": messages,
+               "temperature": temperature, "max_tokens": max_tokens}
+    data = _post(url, _headers(BIELIK_API_KEY), payload)
+    return data["choices"][0]["message"]["content"]
 
-    def _is_e5(self) -> bool:
-        return "e5" in (self.model or "").lower()
+# ====== Embeddings przez OpenShift E5 ======
+from langchain_core.embeddings import Embeddings
+
+class OpenShiftE5Embeddings(Embeddings):
+    def __init__(self, model_name: str, base_url: str, api_key: str):
+        self.model = _normalize_e5_model_id(model_name)
+        self.base = base_url.rstrip("/")
+        self.key = api_key
 
     def _prefix(self, texts: List[str], is_query: bool) -> List[str]:
-        if not self._is_e5():
-            return texts
+        # E5 wymaga prefiksów
         p = "query: " if is_query else "passage: "
         return [p + t for t in texts]
 
-    def _post_embed_once(self, batch: List[str]) -> List[List[float]]:
-        # pojedyncza próba, bez bisekcji
-        resp = _client_embed.embeddings.create(model=self.model, input=batch)
-        return [d.embedding for d in resp.data]
-
-    def _post_embed_with_retry(self, batch: List[str]) -> List[List[float]]:
-        last_err = None
-        for attempt in range(_EMBED_RETRIES):
-            try:
-                return self._post_embed_once(batch)
-            except Exception as e:
-                last_err = e
-                time.sleep(0.5 * (2 ** attempt))  # 0.5s, 1s, 2s, 4s
-        # po wyczerpaniu retry spróbuj zmniejszyć batch (bisekcja)
-        if len(batch) > 1:
-            mid = len(batch) // 2
-            left = self._post_embed_with_retry(batch[:mid])
-            right = self._post_embed_with_retry(batch[mid:])
-            return left + right
-        # jedynka też nie przeszła → rzuć błąd
-        raise last_err
+    def _embed_batch(self, batch: List[str]) -> List[List[float]]:
+        url = f"{self.base}/embeddings"
+        payload = {"model": self.model, "input": batch}
+        data = _post(url, _headers(self.key), payload)
+        return [d["embedding"] for d in data["data"]]
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         texts = self._prefix(texts, is_query=False)
         out: List[List[float]] = []
         for sub in _chunk_by_payload(texts):
-            # podgląd: ile wysyłamy, ile znaków łącznie (bez obcinania)
-            print(f"[EMB] send: {len(sub)} items, {sum(len(t) for t in sub)} chars")
-            out.extend(self._post_embed_with_retry(sub))
+            out.extend(self._embed_batch(sub))
         return out
 
     def embed_query(self, text: str) -> List[float]:
-        return self._post_embed_with_retry(self._prefix([text], is_query=True))[0]
-
+        return self._embed_batch(self._prefix([text], is_query=True))[0]
 
 def build_embeddings(model_name: Optional[str]) -> Embeddings:
     if not model_name:
-        raise ValueError("Brak nazwy modelu embeddings w ENV.")
-    if USE_LMSTUDIO:
-        try:
-            _client_embed.embeddings.create(model=model_name, input=["ping"])
-            return LMStudioEmbeddings(model_name)
-        except Exception as e:
-            print(f"[EMB] LM Studio '{model_name}' niedostępne → fallback lokalny: {e}")
-    # fallback lokalny: Sentence-Transformers → HF BGE
-    try:
-        from sentence_transformers import SentenceTransformer
-        class ST_Emb(Embeddings):
-            def __init__(self, name: str):
-                device = "cuda" if torch.cuda.is_available() else "cpu"
-                self.model = SentenceTransformer(name, device=device)
-            def embed_documents(self, texts: List[str]) -> List[List[float]]:
-                v = self.model.encode(texts, normalize_embeddings=True, convert_to_numpy=True, batch_size=64)
-                return v.astype(np.float32).tolist()
-            def embed_query(self, text: str) -> List[float]:
-                v = self.model.encode([text], normalize_embeddings=True, convert_to_numpy=True)
-                return v[0].astype(np.float32).tolist()
-        return ST_Emb(model_name)
-    except Exception:
-        from langchain_community.embeddings import HuggingFaceBgeEmbeddings
-        return HuggingFaceBgeEmbeddings(
-            model_name=model_name,
-            model_kwargs={'device': 'cuda' if torch.cuda.is_available() else 'cpu'},
-            encode_kwargs={'normalize_embeddings': True},
-        )
+        raise ValueError("Brak EMBEDDER_MODEL_* w ENV.")
+    if not E5_BASE_URL:
+        raise RuntimeError("Brak E5_BASE_URL w ENV.")
+    return OpenShiftE5Embeddings(model_name, E5_BASE_URL, E5_API_KEY)
 
 emb_T = build_embeddings(EMBEDDER_MODEL_T)
 emb_U = build_embeddings(EMBEDDER_MODEL_U)
 
-# --- Cross-Encoder (ONNX → ST) ---
-from sentence_transformers import CrossEncoder
-from transformers import AutoTokenizer
-from optimum.onnxruntime import ORTModelForSequenceClassification
+# ====== Cross-encodery: /v1/rerank (nowe) lub /v1/score (legacy) ======
+class RemoteCE:
+    """
+    Uniwersalny klient:
+    - tryb 'rerank': POST /v1/rerank  {query, documents[], top_k, return_scores}
+    - tryb 'score' : POST /v1/score   {model, input: [{text1, text2}, ...]} (lub równoważne)
+    predict(pairs) zwraca numpy.array w tej samej kolejności co wejście.
+    """
+    def __init__(self, base_url: str, api_key: str = "", model_id: str = ""):
+        self.base = base_url.rstrip("/")
+        self.key = api_key
+        self.model = model_id
+        # autodetekcja trybu po ścieżce
+        if self.base.endswith("/v1/rerank"):
+            self.mode = "rerank"
+            self.url = self.base
+        elif self.base.endswith("/v1/score"):
+            self.mode = "score"
+            self.url = self.base
+        else:
+            # brak ścieżki -> spróbuj score (legacy)
+            self.mode = "score"
+            self.url = self.base + "/v1/score"
+        self._headers = {"Content-Type": "application/json"}
+        if self.key:
+            self._headers["Authorization"] = f"Bearer {self.key}"
 
-class OptimizedONNXCrossEncoder:
-    def __init__(self, model_name: str, device: str = "cpu"):
-        self.device = device
-        self.model = None
-        self.fallback_model = None
+    def _post(self, url: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+        r = requests.post(
+            url,
+            json=payload,
+            headers=self._headers,
+            timeout=(_EMBED_CONNECT_S, max(_EMBED_READ_S, _EMBED_WRITE_S)),
+        )
+        r.raise_for_status()
+        return r.json()
 
-        if not USE_ONNX_CE:
-            self.fallback_model = CrossEncoder(model_name, device="cuda" if torch.cuda.is_available() else "cpu")
-            print(f"[CE] ONNX wyłączony (USE_ONNX_CE=0) → CrossEncoder({model_name})")
-            return
+    def _predict_score(self, pairs: List[Tuple[str, str]], batch_size: int = 64) -> List[float]:
+        out: List[float] = []
+        for i in range(0, len(pairs), batch_size):
+            chunk = pairs[i : i + batch_size]
+            payload = {
+                "model": self.model,
+                "input": [{"text1": a, "text2": b} for (a, b) in chunk],
+            }
+            data = self._post(self.url, payload)
+            if "data" in data and isinstance(data["data"], list) and "score" in data["data"][0]:
+                out.extend(float(x["score"]) for x in data["data"])
+            elif "scores" in data:
+                out.extend(float(s) for s in data["scores"])
+            else:
+                raise RuntimeError(f"Nieoczekiwana odpowiedź /v1/score: {data}")
+        return out
 
-        try:
-            self.tok = AutoTokenizer.from_pretrained(model_name)
-            self.model = ORTModelForSequenceClassification.from_pretrained(
-                model_name, provider="CPUExecutionProvider", export=True
-            )
-            print(f"[CE] ONNX OK: {model_name}")
-        except Exception as e:
-            print(f"[CE] Fallback ST dla {model_name}: {e}")
-            self.fallback_model = CrossEncoder(model_name, device="cuda" if torch.cuda.is_available() else "cpu")
+    def _predict_rerank(self, pairs: List[Tuple[str, str]], batch_size_docs: int = 128) -> List[float]:
+        """
+        /v1/rerank działa na {query, documents[]}, więc grupujemy pary po query.
+        Zwracamy listę score'ów w kolejności wejściowych par.
+        """
+        # 1) zbuduj kolejkę pozycji do odtworzenia kolejności
+        #    idx_map: (query, doc_text) -> [list of indices w pairs]
+        from collections import defaultdict
+        idx_map: Dict[Tuple[str, str], List[int]] = defaultdict(list)
+        for idx, (q, d) in enumerate(pairs):
+            idx_map[(q, d)].append(idx)
+
+        # 2) grupuj dokumenty po query
+        by_query: Dict[str, List[str]] = defaultdict(list)
+        for (q, d) in pairs:
+            by_query[q].append(d)
+
+        # 3) strzelaj per query (chunkując dokumenty gdy trzeba)
+        scores_out: List[Optional[float]] = [None] * len(pairs)
+        for q, docs in by_query.items():
+            # ewentualny dedupe w obrębie query, żeby nie oceniać tego samego d wiele razy
+            seen = {}
+            dedup_docs = []
+            for d in docs:
+                if d not in seen:
+                    seen[d] = len(seen)
+                    dedup_docs.append(d)
+
+            # porcjuj, jeśli dokumentów jest bardzo dużo
+            for i in range(0, len(dedup_docs), batch_size_docs):
+                chunk_docs = dedup_docs[i : i + batch_size_docs]
+                payload = {
+                    "query": q,
+                    "documents": chunk_docs,
+                    "top_k": len(chunk_docs),
+                    "return_scores": True,
+                }
+                data = self._post(self.url, payload)
+
+                # spodziewamy się: {"results": [{"index": i, "document": {"text": ...}, "relevance_score": float}, ...]}
+                results = data.get("results") or data.get("data") or []
+                # zbuduj mapa: doc_text -> score
+                text2score: Dict[str, float] = {}
+                for r in results:
+                    doc = r.get("document") or {}
+                    text = (doc.get("text") or "").strip()
+                    score = r.get("relevance_score")
+                    if text:
+                        text2score[text] = float(score)
+
+                # rozlej po wszystkich wystąpieniach (q, d) w oryginalnych parach
+                for d in chunk_docs:
+                    if d in text2score:
+                        for orig_idx in idx_map.get((q, d), []):
+                            scores_out[orig_idx] = text2score[d]
+
+        # sanity: żadne None
+        for k, v in enumerate(scores_out):
+            if v is None:
+                # nie znaleziono doc w odpowiedzi (np. provider nie zwrócił tekstu) – awaryjnie 0.0
+                scores_out[k] = 0.0
+        return [float(x) for x in scores_out]
 
     def predict(self, pairs: List[Tuple[str, str]], batch_size: int = 64) -> np.ndarray:
-        if self.model is None:
-            return np.array(self.fallback_model.predict(pairs, batch_size=batch_size))
-        import torch as _torch
-        scores: List[float] = []
-        for i in range(0, len(pairs), batch_size):
-            b = pairs[i:i+batch_size]
-            t1 = [p[0] for p in b]; t2 = [p[1] for p in b]
-            enc = self.tok(t1, t2, padding=True, truncation=True, max_length=512, return_tensors="pt")
-            with _torch.no_grad():
-                logits = self.model(**{k: v for k, v in enc.items()}).logits
-                s = _torch.softmax(logits, dim=-1)[:, -1] if logits.shape[-1] > 1 else logits[:, 0]
-            scores.extend(s.cpu().numpy().tolist())
-        return np.array(scores, dtype=np.float32)
+        if not pairs:
+            return np.zeros((0,), dtype=np.float32)
+        if self.mode == "score":
+            vals = self._predict_score(pairs, batch_size=batch_size)
+        else:
+            vals = self._predict_rerank(pairs, batch_size_docs=max(32, batch_size))
+        return np.asarray(vals, dtype=np.float32)
 
-cross_encoder_T = OptimizedONNXCrossEncoder(RERANKER_MODEL_T or "BAAI/bge-reranker-v2-m3")
-cross_encoder_U = OptimizedONNXCrossEncoder(RERANKER_MODEL_U or "cross-encoder/ms-marco-MiniLM-L-6-v2")
+# Użycie: podstawiamy te same zmienne ENV co miałeś
+cross_encoder_T = RemoteCE(BGE_BASE_URL or "https://bge-reranker-v2-krus-chatbox.apps.core.symmetry.pl/v1/rerank",
+                           BGE_API_KEY, RERANKER_MODEL_T or "BAAI/bge-reranker-v2-m3")
+cross_encoder_U = RemoteCE(RADLAB_BASE_URL or "https://polish-cross-encoder-krus-chatbox.apps.core.symmetry.pl/v1/rerank",
+                           RADLAB_API_KEY, RERANKER_MODEL_U or "radlab/polish-cross-encoder")
 
-# --- Chroma: tylko klienci (bez ingestu) ---
+
+# ====== Chroma (bez zmian) ======
 try:
-    from langchain_chroma import Chroma  # nowszy provider
+    from langchain_chroma import Chroma
 except Exception:
     from langchain_community.vectorstores import Chroma
 
@@ -222,5 +262,5 @@ __all__ = [
     "cross_encoder_T", "cross_encoder_U",
     "PERSIST_DIR", "PERSIST_PATH",
     "build_embeddings", "get_embedder",
+    "llm_chat",
 ]
-

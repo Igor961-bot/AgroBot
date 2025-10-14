@@ -21,8 +21,10 @@ from langchain_core.documents import Document
 from langchain.document_loaders import TextLoader
 from langchain.text_splitter import MarkdownHeaderTextSplitter
 
-from resources import build_embeddings 
+from resources import build_embeddings
+from data_schema import row_to_document  # jak miałeś
 
+# ----------------- ENV -----------------
 EMBEDDER_MODEL_T: Optional[str] = os.getenv("EMBEDDER_MODEL_T")
 EMBEDDER_MODEL_U: Optional[str] = os.getenv("EMBEDDER_MODEL_U")
 
@@ -34,6 +36,10 @@ CSV_DIR:  str = os.getenv("CSV_DIR",  "./data/tables/all_data.csv")
 
 CHROMA_WIPE_ON_START: bool = os.getenv("CHROMA_WIPE_ON_START", "false").lower() in ("1", "true", "yes")
 
+# kluczowe – kontrola chunkingu po stronie indeksu (nie tniemy „na ślepo” w kliencie embeddings)
+USTAWA_CHUNK_CHARS   = int(os.getenv("USTAWA_CHUNK_CHARS", "900"))   # ~ okno bezpieczne dla E5
+USTAWA_CHUNK_OVERLAP = int(os.getenv("USTAWA_CHUNK_OVERLAP", "120")) # niewielkie nakładanie
+
 def ensure_clean_dir(path: str, wipe: bool) -> None:
     if wipe:
         shutil.rmtree(path, ignore_errors=True)
@@ -43,6 +49,20 @@ _META_RE = re.compile(
     r"<!--\s*chapter\s*:\s*(\d+)\s+article\s*:\s*([0-9a-z]+)\s+paragraph\s*:\s*([0-9a-z]+)\s+id\s*:\s*([^\s>]+)\s*-->",
     re.I
 )
+
+def _split_chunks(s: str, max_chars: int, overlap: int) -> list[str]:
+    """Prosty splitter po znakach z overlapem — bez zmian w reszcie kodu."""
+    if not s:
+        return [""]
+    s = s.strip()
+    if len(s) <= max_chars:
+        return [s]
+    out, i = [], 0
+    step = max(1, max_chars - overlap)
+    while i < len(s):
+        out.append(s[i:i+max_chars])
+        i += step
+    return out
 
 def parse_md_ustawa(md_path: str) -> List[Document]:
     docs_raw = TextLoader(md_path, encoding="utf-8").load()
@@ -67,7 +87,16 @@ def parse_md_ustawa(md_path: str) -> List[Document]:
         if clean_header:
             md["ustep"] = clean_header
         content = _META_RE.sub("", d.page_content).strip()
-        docs.append(Document(page_content=content, metadata=md))
+
+        # >>> TU: dzielimy długi paragraf na bezpieczne kawałki <<< #
+        parts = _split_chunks(content, USTAWA_CHUNK_CHARS, USTAWA_CHUNK_OVERLAP)
+        total = len(parts)
+        for idx, part in enumerate(parts):
+            md_part = dict(md)
+            md_part["chunk_index"] = idx
+            md_part["chunk_total"] = total
+            # zachowujemy stałe id paragrafu dla spójności, chunk info osobno
+            docs.append(Document(page_content=part, metadata=md_part))
     return docs
 
 def csv_row_to_text(row: Dict[str, str]) -> str:
@@ -75,7 +104,7 @@ def csv_row_to_text(row: Dict[str, str]) -> str:
 
 def build_ustawa(emb_model: str, persist_path: str, data_md: str, wipe: bool) -> int:
     ensure_clean_dir(persist_path, wipe)
-    emb = build_embeddings(emb_model)   
+    emb = build_embeddings(emb_model)
     if not os.path.isfile(data_md):
         print(f"[USTAWA] Brak pliku: {data_md}")
         return 0
@@ -90,10 +119,8 @@ def build_ustawa(emb_model: str, persist_path: str, data_md: str, wipe: bool) ->
         collection_name="ustawa",
         collection_metadata={"hnsw:space": "cosine"},
     )
-    print(f"[USTAWA] Zaindeksowano: {len(docs)}")
+    print(f"[USTAWA] Zaindeksowano: {len(docs)} (z chunkami)")
     return len(docs)
-
-from data_schema import row_to_document  # NEW
 
 def build_statystyki_from_csv(emb_model: str, persist_dir: str, csv_path_or_dir: str, wipe: bool) -> int:
     ensure_clean_dir(persist_dir, wipe)
@@ -138,7 +165,6 @@ def build_statystyki_from_csv(emb_model: str, persist_dir: str, csv_path_or_dir:
     )
     print(f"[STATYSTYKI] Zaindeksowano wierszy: {len(docs)} (pełne metadata)")
     return len(docs)
-
 
 # ---------- MAIN ----------
 def main() -> None:
