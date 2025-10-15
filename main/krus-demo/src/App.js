@@ -6,9 +6,10 @@ import sendIcon from './assets/send.png';
 // import chatBubble2 from './assets/chat-bubble.png';
 import chatBubble2 from './assets/new-message-5.png';
 
-
-// === Backend API helpers ===
-const API_BASE = (process.env.REACT_APP_API_BASE || "http://localhost:8000").replace(/\/$/, "");
+// App.js / api.js
+const baseFromVite  = (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_BASE);
+const baseFromCRA   = (typeof process !== "undefined" && process.env && process.env.REACT_APP_API_BASE);
+const API_BASE = (baseFromVite || baseFromCRA || "http://localhost:8000").replace(/\/$/, "");
 
 async function apiAsk(question, reset_memory = false) {
   const r = await fetch(`${API_BASE}/ask`, {

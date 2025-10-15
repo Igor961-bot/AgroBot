@@ -4,8 +4,8 @@ import os, time
 from typing import List, Optional, Tuple, Dict, Any
 import numpy as np
 import requests
-from dotenv import load_dotenv
-load_dotenv()
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv(), override=True)
 
 # ===== ENV (zachowujemy nazwy używane w reszcie projektu) =====
 EMBEDDER_MODEL_T: Optional[str] = os.getenv("EMBEDDER_MODEL_T")
