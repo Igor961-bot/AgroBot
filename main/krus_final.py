@@ -3,13 +3,10 @@ import os, re, unicodedata, asyncio
 from typing import List, Optional, Dict, Callable
 
 import numpy as np
-import torch
 
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.prompts import PromptTemplate
 from langchain.chains import ConversationalRetrievalChain
-from langchain_core.callbacks import CallbackManager
-from langchain.callbacks.tracers.langchain import LangChainTracer
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.documents import Document
 from pydantic import PrivateAttr
@@ -21,7 +18,6 @@ from resources import cross_encoder_U
 # === LM Studio (OpenAI-compatible) ===
 from langchain_openai import ChatOpenAI
 
-torch.backends.cuda.matmul.allow_tf32 = True
 
 # ----------------- KONFIG -----------------
 sorDEBUG = True
@@ -392,8 +388,6 @@ prompt_followup = PromptTemplate(
     )
 )
 
-tracer = LangChainTracer()
-callback_manager = CallbackManager([tracer])
 
 class FunctionRetriever(BaseRetriever):
     k_sim: int
@@ -421,7 +415,6 @@ qa_chain = ConversationalRetrievalChain.from_llm(
     combine_docs_chain_kwargs={"prompt": prompt_base},
     return_source_documents=True,
     output_key="answer",
-    callback_manager=callback_manager
 )
 
 class ConversationState:

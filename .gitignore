@@ -8,3 +8,4 @@ venv/
 .vscode/
 _pycache_/
 ./_pycache_/
+logs

@@ -7,7 +7,6 @@ import pandas as pd
 import numpy as np
 from langchain_core.documents import Document
 from langchain_community.retrievers import BM25Retriever
-from langchain_openai import ChatOpenAI
 
 from data_schema import (
     F_DATASET, F_MEASURE, F_REGION, F_OKRES, F_TYPE, F_SRC, F_ROW,
@@ -673,6 +672,3 @@ def _choose_best_doc(docs: List[Document], query: str, parsed: Dict[str, Optiona
         return (ce, meas, typm, period_key((d.metadata or {}).get(F_OKRES)))
 
     return max(pool, key=_key) if pool else None
-
-
-

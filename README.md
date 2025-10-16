@@ -41,7 +41,7 @@ W terminalu w folderze *Agrobot* należy uruchomić komendę `pip install -r req
 Należy przejść do pliku `ask.py` który trzeba wywołać. Po załadowaniu, można w konsoli zadawać pytania. Jeśli wybrany tryb to odpowiedź na temat ustawy, po zadaniu pierwszego pytania należy postępować zgodnie z instrukcją wyświetloną w terminalu aby użyć trybu `follow_up`, który sprawia, że użytkownik może zadać dopytywać w odniesieniu o poprzednie pytanie. 
 ### Uruchamianie frontendu oraz backendu
 ### [do zmiany, jeśli będzie nowy front]
-W CMD należy przejść do folderu `.../Agrobot/main` i uruchomić komendę `uvicorn server:app --reload --host 0.0.0.0 --port 8000 --env-file ./.env`. Po załadowaniu backendu w drugim terminalu należy:
+W CMD należy przejść do folderu `.../Agrobot/main` i uruchomić komendę `uvicorn --app-dir main server:app --reload --host 0.0.0.0 --port 8000 --env-file ./.env`. Po załadowaniu backendu w drugim terminalu należy:
 **Jeśli odpalane po raz pierwszy** należy po kolei w folderze `.../Agrobot/main/krus-demo` odpalić kompedę `npm i` a następnie, pozaładowaniu `npm start`. 
 **Jeśli odpalane po raz kolejny** należy pominąć krok z wpisaniem komendy `npm i`.
 Wyświetli się okno, w którym na chacie można zadać pytania. Jeśli użytkownik chce użyć tryby `follow_up` po zadaniu pytania do ustawy może zacisnąc przycisk *dopytaj* (?). 
