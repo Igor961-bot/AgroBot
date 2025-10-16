@@ -1,0 +1,28 @@
+FROM node:24-slim
+
+LABEL org.opencontainers.image.title="abrobot-web" \
+      org.opencontainers.image.description="Agro bot web application" \
+      org.opencontainers.image.version="1.0.0" \
+      org.opencontainers.image.authors="mariusz.raczynski@symmetry.pl"
+
+WORKDIR /app
+
+# Copy package files
+COPY main/krus-demo/package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy application code
+COPY main/krus-demo/ .
+
+# Expose port (typical Node.js port)
+
+# Set environment variables
+ENV PORT=3000
+ENV NODE_ENV=production
+
+EXPOSE 3000
+
+# Entry point
+CMD ["npm", "run", "start"]

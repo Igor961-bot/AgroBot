@@ -1,0 +1,8 @@
+test
+.idea
+.ai
+.claude
+.venv
+logi
+logs
+**/node_modules

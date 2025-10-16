@@ -68,3 +68,11 @@ npm --prefix main/krus-demo install
 ```shell
 npm --prefix main/krus-demo run start
 ```
+
+
+### Build docker images
+
+```shell
+docker build -f Dockerfile-bot . -t agro-bot:1.0.0
+docker build -f Dockerfile-web . -t agro-bot-web:1.0.0
+``` 

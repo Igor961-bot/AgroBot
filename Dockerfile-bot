@@ -1,0 +1,57 @@
+FROM python:3.11-slim
+
+LABEL org.opencontainers.image.title="abrobot-backend" \
+      org.opencontainers.image.description="Agro bot backend" \
+      org.opencontainers.image.version="1.0.0" \
+      org.opencontainers.image.authors="mariusz.raczynski@symmetry.pl"
+
+WORKDIR /app
+
+# Expose port
+EXPOSE 8000
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV UVICORN_HOST="0.0.0.0"
+ENV UVICORN_PORT="8000"
+ENV DEBUG_SERVER=1
+# Bielik (chat)
+ENV  BIELIK_BASE_URL=https://bielik-11b-v2-6-krus-chatbox.apps.core.symmetry.pl/v1
+ENV  BIELIK_MODEL_ID=bielik-11b-v2-6
+# E5 (embeddings)
+ENV  E5_BASE_URL=https://multilingual-e5-krus-chatbox.apps.core.symmetry.pl/v1
+ENV  EMBEDDER_MODEL_T=multilingual-e5
+ENV  EMBEDDER_MODEL_U=multilingual-e5
+# Rerankery (/v1/score)
+ENV  BGE_BASE_URL=https://bge-reranker-v2-krus-chatbox.apps.core.symmetry.pl/v1/rerank
+ENV  RADLAB_BASE_URL=https://bge-reranker-v2-krus-chatbox.apps.core.symmetry.pl/v1/rerank
+ENV  RERANKER_MODEL_T=bge-reranker-v2
+ENV  RERANKER_MODEL_U=polish-cross-encoder
+# Chroma + dane
+ENV  CHROMA_WIPE_ON_START=false
+ENV  PERSIST_DIR=./chroma_statystyki
+ENV  PERSIST_PATH=./chroma_ustawa
+ENV  CSV_DIR=./data/all_data.csv
+ENV  DATA_PATH=./data/ustawa_with_paragraph_headers.md
+ # chunking dla ustawy (indeks)
+ENV  USTAWA_CHUNK_CHARS=900
+ENV  USTAWA_CHUNK_OVERLAP=120
+# limity klienta embeddings
+ENV  EMBED_BATCH=16
+ENV  EMBED_MAX_TOTAL_CHARS=40000
+
+
+# Copy requirements and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project directories
+COPY chroma_ustawa/ ./chroma_ustawa/
+COPY chroma_statystyki/ ./chroma_statystyki/
+COPY main/python/ ./python/
+COPY data ./data/
+
+EXPOSE 8000
+
+# Entry point
+ENTRYPOINT ["uvicorn", "--app-dir", "python", "server:app"]
