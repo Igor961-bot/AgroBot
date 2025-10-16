@@ -8,7 +8,7 @@ import chatBubble2 from './assets/new-message-5.png';
 
 // App.js / api.js
 const baseFromVite  = (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_BASE);
-const baseFromCRA   = (typeof process !== "undefined" && process.env && process.env.REACT_APP_API_BASE);
+const baseFromCRA   = (process.env.REACT_APP_API_BASE);
 const API_BASE = (baseFromVite || baseFromCRA || "http://localhost:8000").replace(/\/$/, "");
 
 async function apiAsk(question, reset_memory = false) {

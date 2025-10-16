@@ -1,3 +1,27 @@
 name: agro-bot
 
+networks:
+  agro-bot: {}
+
 services:
+  backend:
+    build:
+      dockerfile: Dockerfile-bot
+      tags:
+        - agro-bot:1.0.0
+    environment:
+      UVICORN_PORT: 8000
+    networks:
+      - agro-bot
+  web:
+    build:
+      dockerfile: Dockerfile-web
+      tags:
+        - agro-bot-web:1.0.0
+    environment:
+      NGINX_LISTEN_PORT: 3000
+      NGINX_BACKEND_URL: http://backend:8000
+    ports:
+      - "3000:3000"
+    networks:
+      - agro-bot

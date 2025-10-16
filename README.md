@@ -51,10 +51,7 @@ Wyświetli się okno, w którym na chacie można zadać pytania. Jeśli użytkow
 
 #### Zmienne
 
-Do api serwera używa jednego z dwóch zmiennych
-
 `REACT_APP_API_BASE` - adres serwera API
-`VITE_API_BASE` - adres serwera API
 
 #### Instalowanie zależności
 

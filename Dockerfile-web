@@ -1,28 +1,35 @@
-FROM node:24-slim
+# Stage 1: Build React app
+FROM node:24-slim AS builder
+WORKDIR /app
+ARG REACT_APP_API_BASE=/api
+
+# Copy package files
+COPY main/krus-demo/package*.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy application code
+COPY main/krus-demo/ .
+
+# Build the React app
+RUN npm run build
+
+# Stage 2: Serve with Nginx and proxy
+FROM nginx:alpine
+
+COPY --from=builder /app/build /usr/share/nginx/html
+
+# Copy nginx config with API proxy
+COPY conf/nginx.conf /etc/nginx/templates/nginx.conf.template
+# Expose port
 
 LABEL org.opencontainers.image.title="abrobot-web" \
       org.opencontainers.image.description="Agro bot web application" \
       org.opencontainers.image.version="1.0.0" \
       org.opencontainers.image.authors="mariusz.raczynski@symmetry.pl"
 
-WORKDIR /app
-
-# Copy package files
-COPY main/krus-demo/package*.json ./
-
-# Install dependencies
-RUN npm ci --only=production
-
-# Copy application code
-COPY main/krus-demo/ .
-
-# Expose port (typical Node.js port)
-
-# Set environment variables
-ENV PORT=3000
-ENV NODE_ENV=production
-
 EXPOSE 3000
 
-# Entry point
-CMD ["npm", "run", "start"]
+ENV NGINX_LISTEN_PORT=3000
+ENV NGINX_BACKEND_URL=http://localhost:8000

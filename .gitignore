@@ -1,4 +1,5 @@
 /main/krus-demo/node_modules/
+/main/krus-demo/build
 /main/.venv/
 /main/_pycache_/
 /main/chroma_ustawa/
