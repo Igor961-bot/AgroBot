@@ -16,12 +16,12 @@ COPY main/krus-demo/ .
 RUN npm run build
 
 # Stage 2: Serve with Nginx and proxy
-FROM nginx:alpine
+FROM docker.io/nginxinc/nginx-unprivileged:alpine3.22-perl
 
 COPY --from=builder /app/build /usr/share/nginx/html
 
 # Copy nginx config with API proxy
-COPY conf/nginx.conf /etc/nginx/templates/nginx.conf.template
+COPY conf/nginx.conf /etc/nginx/templates/default.conf.template
 # Expose port
 
 LABEL org.opencontainers.image.title="abrobot-web" \
