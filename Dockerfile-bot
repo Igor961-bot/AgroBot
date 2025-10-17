@@ -7,13 +7,23 @@ LABEL org.opencontainers.image.title="abrobot-backend" \
 
 WORKDIR /app
 
-# Expose port
-EXPOSE 8000
+# Copy project directories
+COPY chroma_ustawa/ ./chroma_ustawa/
+COPY chroma_statystyki/ ./chroma_statystyki/
+COPY main/python/ ./python/
+COPY data ./data/
+
+# Copy requirements and install dependencies
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+RUN useradd bot && chown -R bot:bot /app
+USER bot
+
+EXPOSE 80
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
-ENV UVICORN_HOST="0.0.0.0"
-ENV UVICORN_PORT="8000"
 ENV DEBUG_SERVER=1
 # Bielik (chat)
 ENV  BIELIK_BASE_URL=https://bielik-11b-v2-6-krus-chatbox.apps.core.symmetry.pl/v1
@@ -40,18 +50,5 @@ ENV  USTAWA_CHUNK_OVERLAP=120
 ENV  EMBED_BATCH=16
 ENV  EMBED_MAX_TOTAL_CHARS=40000
 
-
-# Copy requirements and install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy project directories
-COPY chroma_ustawa/ ./chroma_ustawa/
-COPY chroma_statystyki/ ./chroma_statystyki/
-COPY main/python/ ./python/
-COPY data ./data/
-
-EXPOSE 8000
-
 # Entry point
-ENTRYPOINT ["uvicorn", "--app-dir", "python", "server:app"]
+ENTRYPOINT ["uvicorn", "--app-dir", "python", "server:app", "--port", "8080", "--host", "0.0.0.0"]
